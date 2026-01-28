@@ -1,0 +1,93 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block title %}Features - NeuralSync Live{% endblock %}
+
+{% block content %}
+<section class="py-5 mt-5">
+    <div class="container py-5">
+        <div class="text-center mb-5 animate-slide-up">
+            <h1 class="display-4 fw-bold mb-3">Powerful Features for <span class="text-gradient">Adaptive
+                    Learning</span></h1>
+            <p class="lead text-muted mx-auto" style="max-width: 700px;">Discover how NeuralSync Live leverages Gemini 3
+                to create personalized learning experiences that adapt to your unique pace and style.</p>
+        </div>
+
+        <!-- Features List -->
+        <div class="row g-4 pt-4">
+            <!-- Feature 1 -->
+            <div class="col-md-6 animate-slide-up">
+                <div class="card h-100 border-0 glassmorphism hover-lift">
+                    <div class="card-body p-4 d-flex gap-4">
+                        <div class="feature-icon flex-shrink-0 bg-primary bg-opacity-10 text-primary rounded-4 d-flex align-items-center justify-content-center"
+                            style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 fw-bold mb-3">Multimodal Analysis</h3>
+                            <p class="text-secondary mb-0">Gemini 3 processes video, images, text, and code
+                                simultaneously, understanding context deeper than any single-modal model could.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-md-6 animate-slide-up" style="animation-delay: 0.1s;">
+                <div class="card h-100 border-0 glassmorphism hover-lift">
+                    <div class="card-body p-4 d-flex gap-4">
+                        <div class="feature-icon flex-shrink-0 bg-info bg-opacity-10 text-info rounded-4 d-flex align-items-center justify-content-center"
+                            style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 fw-bold mb-3">Cognitive Tracking</h3>
+                            <p class="text-secondary mb-0">The system builds a model of your understanding, identifying
+                                knowledge gaps and adjusting difficulty in real-time.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-md-6 animate-slide-up" style="animation-delay: 0.2s;">
+                <div class="card h-100 border-0 glassmorphism hover-lift">
+                    <div class="card-body p-4 d-flex gap-4">
+                        <div class="feature-icon flex-shrink-0 bg-success bg-opacity-10 text-success rounded-4 d-flex align-items-center justify-content-center"
+                            style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 fw-bold mb-3">Socratic Dialogue</h3>
+                            <p class="text-secondary mb-0">Instead of giving answers, the AI asks guiding questions,
+                                promoting deep active learning and critical thinking skills.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="col-md-6 animate-slide-up" style="animation-delay: 0.3s;">
+                <div class="card h-100 border-0 glassmorphism hover-lift">
+                    <div class="card-body p-4 d-flex gap-4">
+                        <div class="feature-icon flex-shrink-0 bg-warning bg-opacity-10 text-warning rounded-4 d-flex align-items-center justify-content-center"
+                            style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 fw-bold mb-3">Generative Practice</h3>
+                            <p class="text-secondary mb-0">Never run out of practice material. The system generates new,
+                                unique problems tailored exactly to what you need to master.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5 pt-4">
+            <p class="lead mb-4">Ready to experience these features?</p>
+            <a href="{% url 'main_app:demo' %}" class="btn btn-primary btn-lg rounded-pill px-5">Try the Demo</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

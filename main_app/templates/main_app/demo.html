@@ -1,0 +1,281 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block title %}Demo - NeuralSync Live{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/demo.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="demo-container pt-5 mt-4 min-vh-100 position-relative">
+    <!-- Mode Selector Section -->
+    <section class="mode-selector-section py-5">
+        <div class="container">
+            <div class="text-center mb-5 animate-slide-up">
+                <h1 class="display-4 fw-bold mb-3">Choose Your Learning Mode</h1>
+                <p class="lead">Select how you want to interact with Gemini 3 AI</p>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                <!-- Video Mode -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="mode-card h-100 d-flex flex-column text-center p-4" data-mode="video">
+                        <div class="mode-icon mx-auto mb-4 rounded-4 text-white d-flex align-items-center justify-content-center shadow-lg"
+                            style="width: 80px; height: 80px; font-size: 2rem; background: var(--gradient-primary);">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Learn While You Watch</h3>
+                        <p class="text-muted mb-4 flex-grow-1">
+                            Upload educational videos and get interactive questions at key moments
+                        </p>
+                        <button class="btn btn-primary w-100 mode-select-btn mt-auto" data-mode="video">
+                            Select Mode
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Problem Mode -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="mode-card h-100 d-flex flex-column text-center p-4" data-mode="problem">
+                        <div class="mode-icon mx-auto mb-4 rounded-4 text-white d-flex align-items-center justify-content-center shadow-lg"
+                            style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Visual Problem Solver</h3>
+                        <p class="text-muted mb-4 flex-grow-1">
+                            Snap photos of problems and get step-by-step Socratic guidance
+                        </p>
+                        <button class="btn btn-primary w-100 mode-select-btn mt-auto" data-mode="problem">
+                            Select Mode
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Document Mode -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="mode-card h-100 d-flex flex-column text-center p-4" data-mode="document">
+                        <div class="mode-icon mx-auto mb-4 rounded-4 text-white d-flex align-items-center justify-content-center shadow-lg"
+                            style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Document Intelligence</h3>
+                        <p class="text-muted mb-4 flex-grow-1">
+                            Transform documents into interactive concept maps and quizzes
+                        </p>
+                        <button class="btn btn-primary w-100 mode-select-btn mt-auto" data-mode="document">
+                            Select Mode
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Creative Mode -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="mode-card h-100 d-flex flex-column text-center p-4" data-mode="creative">
+                        <div class="mode-icon mx-auto mb-4 rounded-4 text-white d-flex align-items-center justify-content-center shadow-lg"
+                            style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Creative Workshop</h3>
+                        <p class="text-muted mb-4 flex-grow-1">
+                            Get expert feedback and suggestions for your creative work
+                        </p>
+                        <button class="btn btn-primary w-100 mode-select-btn mt-auto" data-mode="creative">
+                            Select Mode
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Demo Area (Hidden Initially) -->
+    <section class="demo-area animate-slide-up" id="demoArea" style="display: none;">
+        <div class="container pb-5">
+            <div class="row g-4">
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <div class="card glassmorphism sticky-top" style="top: 100px; z-index: 10;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-4">
+                                <button class="btn btn-outline-secondary btn-sm me-auto" id="backBtn">
+                                    <i class="fas fa-arrow-left me-2"></i>Back
+                                </button>
+                            </div>
+
+                            <div class="text-center mb-4">
+                                <div class="mode-badge d-inline-flex align-items-center justify-content-center text-white rounded-4 shadow-lg mb-3"
+                                    style="width: 64px; height: 64px; font-size: 1.5rem; background: var(--gradient-primary);">
+                                    <i class="fas fa-video" id="modeIcon"></i>
+                                </div>
+                                <h3 class="h5 fw-bold" id="modeTitle">Mode Title</h3>
+                                <p class="small text-muted" id="modeDesc">Mode description</p>
+                            </div>
+
+                            <div class="bg-dark bg-opacity-50 rounded-4 p-3 border border-secondary border-opacity-25">
+                                <h4 class="small text-uppercase text-muted fw-bold mb-3 ls-1">Session Stats</h4>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small text-muted">Questions</span>
+                                    <span class="fw-bold text-primary" id="questionsAsked">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small text-muted">Correct</span>
+                                    <span class="fw-bold text-success" id="correctAnswers">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small text-muted">Accuracy</span>
+                                    <span class="fw-bold text-info" id="accuracy">0%</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small text-muted">Hints</span>
+                                    <span class="fw-bold text-warning" id="hintsUsed">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="col-lg-8">
+                    <div class="card glassmorphism border-0 h-100" style="min-height: 600px;">
+                        <div class="card-body p-4 p-lg-5">
+
+                            <!-- Upload Area -->
+                            <div class="upload-section h-100 d-flex align-items-center justify-content-center"
+                                id="uploadSection">
+                                <div class="text-center w-100 p-5 border-2 border-dashed border-secondary border-opacity-25 rounded-4 transition-base hover-glow"
+                                    style="max-width: 500px; cursor: pointer;">
+                                    <div class="mb-4 text-primary display-4">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <h2 class="h3 mb-3">Upload Content</h2>
+                                    <p class="text-muted mb-4" id="uploadHint">
+                                        Drag and drop your file here, or click to browse
+                                    </p>
+
+                                    <input type="file" id="fileInput" accept="" style="display: none;">
+
+                                    <button class="btn btn-primary btn-lg px-4 rounded-pill" id="browseBtn">
+                                        <i class="fas fa-folder-open me-2"></i> Browse Files
+                                    </button>
+
+                                    <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap" id="fileTypes">
+                                        <span
+                                            class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">MP4</span>
+                                        <span
+                                            class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">MOV</span>
+                                        <span
+                                            class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">AVI</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Analysis Display -->
+                            <div class="analysis-section" id="analysisSection" style="display: none;">
+                                <div
+                                    class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                                    <h2 class="h4 mb-0">Analysis Complete</h2>
+                                    <span class="badge bg-gradient-primary rounded-pill px-3 py-2">
+                                        <i class="fas fa-robot me-2"></i>Gemini 3
+                                    </span>
+                                </div>
+
+                                <div class="analysis-content vstack gap-4" id="analysisContent">
+                                    <!-- Dynamic content will be inserted here -->
+                                </div>
+                            </div>
+
+                            <!-- Interactive Chat -->
+                            <div class="chat-section d-flex flex-column h-100" id="chatSection"
+                                style="display: none; height: 600px !important;">
+                                <div
+                                    class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+                                    <h3 class="h5 mb-0">Interactive Learning</h3>
+                                    <button class="btn btn-outline-warning btn-sm rounded-pill" id="requestHintBtn">
+                                        <i class="fas fa-lightbulb me-2"></i>Hint
+                                    </button>
+                                </div>
+
+                                <div class="chat-messages flex-grow-1 overflow-auto p-3 rounded-4 bg-dark bg-opacity-25 mb-3"
+                                    id="chatMessages">
+                                    <!-- Messages will be added here -->
+                                </div>
+
+                                <div class="chat-input-container d-flex gap-2">
+                                    <textarea
+                                        class="form-control bg-dark bg-opacity-50 border-secondary border-opacity-50 text-white"
+                                        id="chatInput" placeholder="Type your answer or question..." rows="1"
+                                        style="resize: none;"></textarea>
+                                    <button class="btn btn-primary rounded-circle" id="sendBtn"
+                                        style="width: 42px; height: 42px; flex-shrink: 0;">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Loading Modal (Using Bootstrap Modal) -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 glassmorphism">
+            <div class="modal-body text-center p-5">
+                <div class="d-inline-block display-1 mb-4 animate-pulse-glow">To</div>
+                <h3 class="h4 mb-2">Analyzing with Gemini 3...</h3>
+                <p class="text-muted mb-4" id="loadingMessage">Processing your content</p>
+
+                <div class="progress bg-secondary bg-opacity-25" style="height: 6px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-gradient-primary"
+                        id="progressFill" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .demo-sidebar {
+        top: 100px;
+    }
+
+    .mode-card {
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .mode-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .message-bubble {
+        max-width: 80%;
+    }
+
+    .message.user {
+        justify-content: flex-end;
+    }
+
+    .message.user .message-bubble {
+        background: var(--gradient-primary);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .message.ai .message-bubble {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom-left-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/demo.js' %}"></script>
+{% endblock %}

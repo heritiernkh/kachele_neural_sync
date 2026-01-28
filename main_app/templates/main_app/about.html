@@ -1,0 +1,64 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block title %}About - NeuralSync Live{% endblock %}
+
+{% block content %}
+<section class="py-5 mt-5" style="min-height: 80vh;">
+    <div class="container py-5">
+        <div class="text-center mb-5 animate-slide-up">
+            <h1 class="display-4 fw-bold mb-3">About <span class="text-gradient">NeuralSync Live</span></h1>
+            <p class="lead text-muted">Built for the Gemini 3 Global Hackathon</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8 animate-slide-up">
+                <div class="card glassmorphism border-0 p-4 p-md-5">
+                    <h2 class="h3 fw-bold mb-4">Our Mission</h2>
+                    <p class="text-secondary mb-5 lead">
+                        NeuralSync Live transforms traditional learning into an adaptive, personalized experience.
+                        We believe education should adapt to the learner, not the other way around. By leveraging the
+                        multimodal capabilities of Gemini 3, we create a tutor that sees, hears, and understands context
+                        just like a human expert would.
+                    </p>
+
+                    <h2 class="h3 fw-bold mb-4">Powered by Gemini 3</h2>
+                    <p class="text-secondary mb-3">
+                        This platform showcases the incredible capabilities of Gemini 3's multimodal AI:
+                    </p>
+                    <ul class="list-unstyled d-grid gap-3 mb-5 text-secondary">
+                        <li class="d-flex align-items-center"><i
+                                class="fas fa-check-circle text-success me-3"></i>Real-time video and document analysis
+                        </li>
+                        <li class="d-flex align-items-center"><i
+                                class="fas fa-check-circle text-success me-3"></i>Advanced reasoning for step-by-step
+                            guidance</li>
+                        <li class="d-flex align-items-center"><i
+                                class="fas fa-check-circle text-success me-3"></i>Low-latency interactions for seamless
+                            learning</li>
+                        <li class="d-flex align-items-center"><i
+                                class="fas fa-check-circle text-success me-3"></i>Adaptive difficulty and personalized
+                            feedback</li>
+                    </ul>
+
+                    <div
+                        class="bg-dark bg-opacity-50 p-4 rounded-4 border border-secondary border-opacity-25 text-center">
+                        <h3 class="h5 fw-bold mb-3">The Team</h3>
+                        <p class="text-muted mb-0">
+                            Created with passion for the Gemini 3 Global Hackathon.
+                            We're pushing the boundaries of AI-powered education.
+                        </p>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <a href="{% url 'main_app:demo' %}" class="btn btn-primary btn-lg rounded-pill px-5">
+                            <span>Try NeuralSync Live</span>
+                            <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,364 @@
+/* ============================================
+   ADDITIONAL BOOTSTRAP ENHANCEMENTS
+   ============================================ */
+
+/* Form Controls - Dark Theme */
+.form-control,
+.form-select,
+.form-check-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    padding: var(--space-md);
+    transition: all var(--transition-base);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+    color: var(--text-primary);
+}
+
+.form-control::placeholder {
+    color: var(--text-tertiary);
+}
+
+.form-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+}
+
+/* Modal Enhancements */
+.modal-content {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    backdrop-filter: blur(20px);
+}
+
+.modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+.modal-footer {
+    border-top-color: var(--border-color);
+}
+
+.modal-title {
+    color: var(--text-primary);
+}
+
+/* Dropdown Enhancements */
+.dropdown-menu {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-xl);
+}
+
+.dropdown-item {
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.dropdown-item:hover {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-300);
+}
+
+/* Progress Bar */
+.progress {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-full);
+    height: 8px;
+}
+
+.progress-bar {
+    background: var(--gradient-primary);
+    border-radius: var(--radius-full);
+}
+
+/* Spinner */
+.spinner-border {
+    border-color: rgba(99, 102, 241, 0.2);
+    border-right-color: var(--primary-500);
+}
+
+/* List Group */
+.list-group-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    transition: all var(--transition-base);
+}
+
+.list-group-item:hover {
+    background: rgba(99, 102, 241, 0.05);
+    border-color: var(--border-hover);
+}
+
+/* Table */
+.table {
+    color: var(--text-primary);
+}
+
+.table-dark {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.table-striped>tbody>tr:nth-of-type(odd)>* {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+}
+
+.breadcrumb-item a {
+    color: var(--primary-400);
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: var(--text-secondary);
+}
+
+/* Pagination */
+.pagination .page-link {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+    transition: all var(--transition-base);
+}
+
+.pagination .page-link:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--primary-500);
+    color: var(--primary-300);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--gradient-primary);
+    border-color: var(--primary-500);
+}
+
+/* Accordion */
+.accordion-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--space-sm);
+    border-radius: var(--radius-lg) !important;
+}
+
+.accordion-button {
+    background: transparent;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.accordion-button:not(.collapsed) {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-300);
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: var(--primary-500);
+}
+
+.accordion-body {
+    color: var(--text-secondary);
+}
+
+/* Tooltips */
+.tooltip-inner {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+}
+
+/* Popover */
+.popover {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(20px);
+}
+
+.popover-header {
+    background: rgba(99, 102, 241, 0.1);
+    border-bottom-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.popover-body {
+    color: var(--text-secondary);
+}
+
+/* Navbar Enhancements for Bootstrap */
+.navbar-dark .navbar-nav .nav-link {
+    color: var(--text-secondary);
+    transition: color var(--transition-base);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--text-primary);
+}
+
+.navbar-dark .navbar-toggler {
+    border-color: var(--border-color);
+}
+
+/* Offcanvas */
+.offcanvas {
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border-color);
+}
+
+.offcanvas-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.offcanvas-title {
+    color: var(--text-primary);
+}
+
+/* Toast */
+.toast {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(20px);
+}
+
+.toast-header {
+    background: rgba(99, 102, 241, 0.1);
+    border-bottom-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.toast-body {
+    color: var(--text-secondary);
+}
+
+/* Utility Classes */
+.glassmorphism {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+}
+
+.glow {
+    box-shadow: var(--shadow-glow);
+}
+
+.text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Animation Classes */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+    }
+}
+
+.animate-slide-up {
+    animation: slideInUp 0.6s ease-out;
+}
+
+.animate-slide-right {
+    animation: slideInRight 0.6s ease-out;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Hover Effects */
+.hover-lift {
+    transition: transform var(--transition-base);
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+}
+
+.hover-glow {
+    transition: all var(--transition-base);
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.3);
+    border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.5);
+}
+
+/* Selection */
+::selection {
+    background: rgba(99, 102, 241, 0.3);
+    color: var(--text-primary);
+}

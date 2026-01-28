@@ -1,0 +1,77 @@
+/* ============================================
+   BOOTSTRAP DARK MODE OVERRIDES
+   ============================================ */
+
+/* Fix Text Contrast for Dark Mode */
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+
+.text-dark {
+    color: var(--text-primary) !important;
+}
+
+.text-body {
+    color: var(--text-secondary) !important;
+}
+
+/* Fix Headings Visibility */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+    color: var(--text-primary) !important;
+}
+
+/* Fix Backgrounds */
+.bg-dark {
+    background-color: var(--bg-secondary) !important;
+}
+
+.bg-light {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-primary) !important;
+}
+
+.bg-white {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Fix Borders */
+.border,
+.border-top,
+.border-bottom,
+.border-start,
+.border-end {
+    border-color: var(--border-color) !important;
+}
+
+.border-secondary {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Fix Links in Footer */
+.footer a.text-muted:hover {
+    color: var(--primary-400) !important;
+}
+
+/* Fix Social Buttons in Footer if they are outlined light */
+.btn-outline-light {
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.btn-outline-light:hover {
+    background: var(--gradient-primary);
+    border-color: transparent;
+    color: white;
+}
