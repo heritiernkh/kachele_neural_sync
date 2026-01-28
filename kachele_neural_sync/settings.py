@@ -127,3 +127,11 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
+
+# Gemini API Configuration
+# Charge la clé depuis les variables d'environnement
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY', '')
+
+# Si aucune clé n'est trouvée, on affiche un avertissement mais on ne plante pas ici
+if not GOOGLE_API_KEY:
+    print("WARNING: GOOGLE_API_KEY not found in environment variables. AI features will require setup.")

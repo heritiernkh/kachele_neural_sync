@@ -109,75 +109,106 @@ def upload_content(request):
                 'error': f'Unsupported file type: {file_extension}'
             }, status=400)
         
-        # Sauvegarder le fichier
-        file_path = default_storage.save(
-            f'uploads/{session.id}/{file.name}',
-            ContentFile(file.read())
-        )
+        # Utiliser un fichier temporaire au lieu du stockage permanent
+        import tempfile
+        import shutil
+        from django.conf import settings
         
-        # Créer l'objet UploadedContent
-        uploaded_content = UploadedContent.objects.create(
-            session=session,
-            content_type=content_type,
-            file=file_path,
-            filename=file.name,
-            file_size=file.size
-        )
+        # Créer un répertoire temporaire si nécessaire
+        temp_dir = os.path.join(settings.BASE_DIR, 'tmp_uploads')
+        os.makedirs(temp_dir, exist_ok=True)
         
-        # Analyser avec Gemini selon le mode
-        analysis_result = None
+        # Chemin du fichier temporaire
+        temp_file_path = os.path.join(temp_dir, file.name)
         
-        if session.mode == 'video' and content_type == 'video':
-            analysis_result = gemini_service.analyze_video(
-                uploaded_content.file,
-                context=context
-            )
-        elif session.mode == 'problem' and content_type == 'image':
-            analysis_result = gemini_service.analyze_image_problem(
-                uploaded_content.file,
-                subject_hint=context
-            )
-        elif session.mode == 'document' and content_type == 'document':
-            analysis_result = gemini_service.analyze_document(
-                uploaded_content.file,
-                focus_areas=context
-            )
-        elif session.mode == 'creative' and content_type == 'image':
-            analysis_result = gemini_service.creative_workshop(
-                uploaded_content.file,
-                creative_goal=context
-            )
+        # Écrire le fichier téléchargé sur le disque
+        with open(temp_file_path, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
         
-        if analysis_result and analysis_result.get('success'):
-            # Sauvegarder l'analyse
-            uploaded_content.analysis_completed = True
-            uploaded_content.analysis_summary = json.dumps(analysis_result['analysis'])
+        try:
+            # Créer l'objet UploadedContent (sans fichier physique permanent pour l'instant)
+            # On stocke juste le nom pour référence
+            uploaded_content = UploadedContent.objects.create(
+                session=session,
+                content_type=content_type,
+                file=None, # Pas de stockage permanent Django
+                filename=file.name,
+                file_size=file.size
+            )
             
-            # Extraire les concepts clés si disponibles
-            if 'key_concepts' in analysis_result['analysis']:
-                uploaded_content.key_concepts = analysis_result['analysis']['key_concepts']
+            # Analyser avec Gemini selon le mode (en passant le chemin temporaire)
+            # Note: Il faut adapter GeminiService pour accepter un path str
             
-            uploaded_content.save()
+            # Objet simulant un File Django pour compatibilité si nécessaire, 
+            # mais mieux vaut passer le path direct si le service est adapté.
+            # Pour l'instant on garde la logique d'appel mais on passera un objet qui a un attribut .path
             
-            # Si c'est un document, créer la carte conceptuelle
-            if session.mode == 'document' and 'concept_map' in analysis_result['analysis']:
-                ConceptMap.objects.create(
-                    session=session,
-                    nodes=analysis_result['analysis']['concept_map'].get('nodes', []),
-                    edges=analysis_result['analysis']['concept_map'].get('edges', [])
+            class TempFileWrapper:
+                def __init__(self, path):
+                    self.path = path
+            
+            temp_file_obj = TempFileWrapper(temp_file_path)
+            
+            analysis_result = None
+            
+            if session.mode == 'video' and content_type == 'video':
+                analysis_result = gemini_service.analyze_video(
+                    temp_file_obj,
+                    context=context
+                )
+            elif session.mode == 'problem' and content_type == 'image':
+                analysis_result = gemini_service.analyze_image_problem(
+                    temp_file_path, # On passe le path directement car PIL.Image.open l'accepte
+                    subject_hint=context
+                )
+            elif session.mode == 'document' and content_type == 'document':
+                analysis_result = gemini_service.analyze_document(
+                    temp_file_obj,
+                    focus_areas=context
+                )
+            elif session.mode == 'creative' and content_type == 'image':
+                analysis_result = gemini_service.creative_workshop(
+                    temp_file_path, 
+                    creative_goal=context
                 )
             
-            return JsonResponse({
-                'success': True,
-                'upload_id': str(uploaded_content.id),
-                'analysis': analysis_result['analysis']
-            })
-        else:
-            error_msg = analysis_result.get('error', 'Analysis failed') if analysis_result else 'No analysis performed'
-            return JsonResponse({
-                'success': False,
-                'error': error_msg
-            }, status=500)
+            if analysis_result and analysis_result.get('success'):
+                # Sauvegarder l'analyse
+                uploaded_content.analysis_completed = True
+                uploaded_content.analysis_summary = json.dumps(analysis_result['analysis'])
+                
+                # Extraire les concepts clés si disponibles
+                if 'key_concepts' in analysis_result['analysis']:
+                    uploaded_content.key_concepts = analysis_result['analysis']['key_concepts']
+                
+                uploaded_content.save()
+                
+                # Si c'est un document, créer la carte conceptuelle
+                if session.mode == 'document' and 'concept_map' in analysis_result['analysis']:
+                    ConceptMap.objects.create(
+                        session=session,
+                        nodes=analysis_result['analysis']['concept_map'].get('nodes', []),
+                        edges=analysis_result['analysis']['concept_map'].get('edges', [])
+                    )
+                
+                return JsonResponse({
+                    'success': True,
+                    'upload_id': str(uploaded_content.id),
+                    'analysis': analysis_result['analysis']
+                })
+            else:
+                error_msg = analysis_result.get('error', 'Analysis failed') if analysis_result else 'No analysis performed'
+                return JsonResponse({
+                    'success': False,
+                    'error': error_msg
+                }, status=500)
+                
+        finally:
+            # Nettoyage : Supprimer le fichier temporaire QUOI QU'IL ARRIVE
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+                print(f"Fichier temporaire supprimé: {temp_file_path}")
         
     except LearningSession.DoesNotExist:
         return JsonResponse({
@@ -185,6 +216,9 @@ def upload_content(request):
             'error': 'Session not found'
         }, status=404)
     except Exception as e:
+        import traceback
+        traceback.print_exc()  # Affiche l'erreur complète dans la console serveur
+        print(f"Error in upload_content: {str(e)}")
         return JsonResponse({
             'success': False,
             'error': str(e)

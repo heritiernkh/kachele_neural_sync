@@ -148,7 +148,13 @@ function showSuccess(element, message) {
 /**
  * Create notification toast
  */
-function showToast(message, type = 'info') {
+/**
+ * Create notification toast
+ * @param {string} message - Message to display
+ * @param {string} type - Type of notification (info, success, error)
+ * @param {number} duration - Duration in ms (default: 3000 for info/success, 5000 for error)
+ */
+function showToast(message, type = 'info', duration = null) {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.innerHTML = `
@@ -161,11 +167,40 @@ function showToast(message, type = 'info') {
     // Trigger animation
     setTimeout(() => toast.classList.add('show'), 10);
 
-    // Remove after 3 seconds
-    setTimeout(() => {
+    // Determine duration
+    const timeoutDuration = duration || (type === 'error' ? 10000 : 5000); // 10s pour erreurs, 5s pour le reste
+
+    let timeoutId;
+
+    const startTimer = () => {
+        timeoutId = setTimeout(() => {
+            removeToast();
+        }, timeoutDuration);
+    };
+
+    const removeToast = () => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    };
+
+    // Start initial timer
+    startTimer();
+
+    // Pause on hover
+    toast.addEventListener('mouseenter', () => {
+        clearTimeout(timeoutId);
+    });
+
+    // Resume on mouse leave
+    toast.addEventListener('mouseleave', () => {
+        startTimer();
+    });
+
+    // Click to close immediately
+    toast.addEventListener('click', () => {
+        clearTimeout(timeoutId);
+        removeToast();
+    });
 }
 
 // ============================================

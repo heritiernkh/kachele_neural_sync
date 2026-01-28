@@ -28,6 +28,44 @@ const sendBtn = document.getElementById('sendBtn');
 const chatMessages = document.getElementById('chatMessages');
 const requestHintBtn = document.getElementById('requestHintBtn');
 
+// ============================================
+// LOADING MODAL LOGIC (Moved here to avoid hoisting issues)
+// ============================================
+let bsLoadingModal = null;
+
+function showLoadingModal(message = 'Processing...') {
+    const modalEl = document.getElementById('loadingModal');
+    if (!bsLoadingModal) {
+        bsLoadingModal = new bootstrap.Modal(modalEl);
+    }
+
+    document.getElementById('loadingMessage').textContent = message;
+
+    // Reset progress bar
+    const progressFill = document.getElementById('progressFill');
+    if (progressFill) {
+        progressFill.style.width = '0%';
+        progressFill.className = 'progress-bar bg-gradient-primary'; // Reset animations
+    }
+
+    bsLoadingModal.show();
+}
+
+function hideLoadingModal() {
+    if (bsLoadingModal) {
+        bsLoadingModal.hide();
+        // Force cleanup backdrop if needed
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+        document.body.classList.remove('modal-open');
+        document.body.style = '';
+    }
+}
+
+function updateLoadingMessage(message) {
+    document.getElementById('loadingMessage').textContent = message;
+}
+
 // Mode configurations
 const modeConfig = {
     video: {
@@ -183,38 +221,78 @@ async function handleFileUpload(file) {
 
     // Show loading modal
     showLoadingModal(`Uploading ${file.name}...`);
+    const progressFill = document.getElementById('progressFill');
+    if (progressFill) progressFill.style.width = '0%';
 
     const formData = new FormData();
     formData.append('file', file);
     formData.append('session_id', currentSessionId);
-    formData.append('context', ''); // Can be customized later
+    formData.append('context', '');
 
-    try {
-        // Simulate upload progress
-        setTimeout(() => {
-            updateLoadingMessage('Analyzing with Gemini 3...');
-        }, 1000);
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
 
-        const response = await fetch('/api/upload/', {
-            method: 'POST',
-            body: formData
+        // Progress event
+        xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+                const percentComplete = Math.round((e.loaded / e.total) * 100);
+                if (progressFill) {
+                    progressFill.style.width = `${percentComplete}%`;
+
+                    if (percentComplete === 100) {
+                        updateLoadingMessage('Analyzing with Gemini 3 (this may take a moment)...');
+                        progressFill.classList.add('progress-bar-striped', 'progress-bar-animated');
+                    } else {
+                        updateLoadingMessage(`Uploading: ${percentComplete}%`);
+                    }
+                }
+            }
         });
 
-        const data = await response.json();
+        // Load event (Upload finished, waiting for server response)
+        xhr.addEventListener('load', () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    hideLoadingModal();
 
-        hideLoadingModal();
+                    if (data.success) {
+                        window.NeuralSync.showToast('Analysis complete!', 'success');
+                        displayAnalysis(data.analysis);
+                        resolve(data);
+                    } else {
+                        window.NeuralSync.showToast(data.error || 'Upload failed', 'error');
+                        reject(new Error(data.error));
+                    }
+                } catch (e) {
+                    hideLoadingModal();
+                    window.NeuralSync.showToast('Invalid server response', 'error');
+                    reject(e);
+                }
+            } else {
+                hideLoadingModal();
+                let errorMsg = 'Upload failed';
+                try {
+                    const errData = JSON.parse(xhr.responseText);
+                    errorMsg = errData.error || errorMsg;
+                } catch (e) { }
 
-        if (data.success) {
-            window.NeuralSync.showToast('Analysis complete!', 'success');
-            displayAnalysis(data.analysis);
-        } else {
-            throw new Error(data.error || 'Upload failed');
-        }
-    } catch (error) {
-        hideLoadingModal();
-        console.error('Upload error:', error);
-        window.NeuralSync.showToast('Upload failed: ' + error.message, 'error');
-    }
+                window.NeuralSync.showToast(errorMsg, 'error');
+                reject(new Error(errorMsg));
+            }
+        });
+
+        // Error event
+        xhr.addEventListener('error', () => {
+            hideLoadingModal();
+            window.NeuralSync.showToast('Network error during upload', 'error');
+            reject(new Error('Network error'));
+        });
+
+        // Send request
+        xhr.open('POST', '/api/upload/');
+        xhr.send(formData);
+    });
 }
 
 // ============================================
@@ -225,14 +303,17 @@ function displayAnalysis(analysis) {
     analysisSection.style.display = 'block';
 
     const analysisContent = document.getElementById('analysisContent');
-    let html = '';
+    let html = '<div class="analysis-container">';
 
     // Summary
     if (analysis.summary) {
         html += `
-            <div class="analysis-card">
-                <h3><i class="fas fa-lightbulb"></i> Summary</h3>
-                <p>${analysis.summary}</p>
+            <div class="result-card animate-slide-up">
+                <div class="result-header">
+                    <div class="result-icon"><i class="fas fa-lightbulb"></i></div>
+                    <h3 class="result-title">Executive Summary</h3>
+                </div>
+                <p class="text-secondary">${analysis.summary}</p>
             </div>
         `;
     }
@@ -240,13 +321,16 @@ function displayAnalysis(analysis) {
     // Key Concepts
     if (analysis.key_concepts && analysis.key_concepts.length > 0) {
         html += `
-            <div class="analysis-card">
-                <h3><i class="fas fa-brain"></i> Key Concepts</h3>
-                <ul class="concept-list">
+            <div class="result-card animate-slide-up" style="animation-delay: 0.1s">
+                <div class="result-header">
+                    <div class="result-icon"><i class="fas fa-brain"></i></div>
+                    <h3 class="result-title">Key Concepts</h3>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
                     ${analysis.key_concepts.map(concept =>
-            `<li class="concept-item">${concept}</li>`
+            `<span class="concept-tag">${concept}</span>`
         ).join('')}
-                </ul>
+                </div>
             </div>
         `;
     }
@@ -254,19 +338,22 @@ function displayAnalysis(analysis) {
     // Interactive Questions
     if (analysis.interactive_questions && analysis.interactive_questions.length > 0) {
         html += `
-            <div class="analysis-card">
-                <h3><i class="fas fa-question-circle"></i> Interactive Questions</h3>
-                <p style="color: var(--text-secondary); margin-bottom: var(--space-lg);">
+            <div class="result-card animate-slide-up" style="animation-delay: 0.2s">
+                <div class="result-header">
+                    <div class="result-icon"><i class="fas fa-question-circle"></i></div>
+                    <h3 class="result-title">Interactive Questions</h3>
+                </div>
+                <p class="text-secondary small mb-3">
                     Answer these questions to deepen your understanding
                 </p>
                 ${analysis.interactive_questions.slice(0, 3).map((q, idx) => `
-                    <div class="question-card">
+                    <div class="question-item">
                         <div class="question-text">${idx + 1}. ${q.question}</div>
-                        <div class="question-actions">
-                            <button class="btn btn-primary btn-sm answer-question-btn" 
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-primary btn-sm action-btn answer-question-btn" 
                                     data-question="${encodeURIComponent(q.question)}"
                                     data-answer="${encodeURIComponent(q.answer || '')}">
-                                Answer Now
+                                <i class="fas fa-comment-dots me-2"></i>Answer Now
                             </button>
                         </div>
                     </div>
@@ -278,16 +365,19 @@ function displayAnalysis(analysis) {
     // Document-specific: Quiz Questions
     if (analysis.quiz_questions && analysis.quiz_questions.length > 0) {
         html += `
-            <div class="analysis-card">
-                <h3><i class="fas fa-graduation-cap"></i> Quiz Time</h3>
+            <div class="result-card animate-slide-up" style="animation-delay: 0.2s">
+                <div class="result-header">
+                    <div class="result-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3 class="result-title">Quiz Time</h3>
+                </div>
                 ${analysis.quiz_questions.slice(0, 3).map((q, idx) => `
-                    <div class="question-card">
+                    <div class="question-item border-start-0 border-top pt-3">
                         <div class="question-text">${idx + 1}. ${q.question}</div>
                         ${q.options ? `
-                            <div style="margin: var(--space-md) 0;">
+                            <div class="d-flex flex-column gap-2 mb-2">
                                 ${q.options.map((opt, oidx) => `
-                                    <div class="quiz-option" data-question-idx="${idx}" data-option="${oidx}">
-                                        ${String.fromCharCode(65 + oidx)}. ${opt}
+                                    <div class="text-secondary small">
+                                        <strong class="text-primary">${String.fromCharCode(65 + oidx)}.</strong> ${opt}
                                     </div>
                                 `).join('')}
                             </div>
@@ -301,18 +391,24 @@ function displayAnalysis(analysis) {
     // Creative-specific: Suggestions
     if (analysis.improvements && analysis.improvements.length > 0) {
         html += `
-            <div class="analysis-card">
-                <h3><i class="fas fa-magic"></i> Suggestions for Improvement</h3>
-                <ul class="concept-list">
+            <div class="result-card animate-slide-up" style="animation-delay: 0.2s">
+                <div class="result-header">
+                    <div class="result-icon"><i class="fas fa-magic"></i></div>
+                    <h3 class="result-title">Suggestions for Improvement</h3>
+                </div>
+                <div class="list-group list-group-flush bg-transparent">
                     ${analysis.improvements.slice(0, 5).map(imp =>
-            `<li class="concept-item">
-                            <strong>${imp.aspect}:</strong> ${imp.suggestion}
-                        </li>`
+            `<div class="list-group-item bg-transparent border-secondary border-opacity-25 px-0">
+                            <strong class="d-block text-white mb-1">${imp.aspect}</strong>
+                            <span class="text-secondary small">${imp.suggestion}</span>
+                        </div>`
         ).join('')}
-                </ul>
+                </div>
             </div>
         `;
     }
+
+    html += '</div>';
 
     analysisContent.innerHTML = html;
 
@@ -503,21 +599,7 @@ function addMessage(sender, text) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// ============================================
-// 6. LOADING MODAL
-// ============================================
-function showLoadingModal(message = 'Processing...') {
-    document.getElementById('loadingMessage').textContent = message;
-    loadingModal.classList.add('active');
-}
 
-function hideLoadingModal() {
-    loadingModal.classList.remove('active');
-}
-
-function updateLoadingMessage(message) {
-    document.getElementById('loadingMessage').textContent = message;
-}
 
 // ============================================
 // 7. BACK BUTTON

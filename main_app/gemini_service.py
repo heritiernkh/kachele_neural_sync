@@ -1,44 +1,71 @@
 """
-Service d'intégration avec l'API Gemini 3
+Service d'intégration avec l'API Gemini 3 (SDK v1.0+)
 Gère toutes les interactions avec le modèle d'IA
 """
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from django.conf import settings
 import json
 import base64
 from PIL import Image
 import io
-
-# Configuration de l'API
-genai.configure(api_key=settings.GOOGLE_API_KEY)
-
+import os
 
 class GeminiService:
-    """Service principal pour interagir avec Gemini 3"""
+    """Service principal pour interagir avec Gemini 3 (Nouveau SDK)"""
     
-    def __init__(self, model_name="gemini-2.0-flash-exp"):
+    def __init__(self, model_name="gemini-3-flash-preview"):
         """
-        Initialise le service Gemini
-        Utilise gemini-2.0-flash-exp pour la vitesse et les capacités multimodales
+        Initialise le client Gemini
         """
-        self.model = genai.GenerativeModel(model_name)
+        self.api_key = settings.GOOGLE_API_KEY
+        self.model_name = model_name
+        self.client = None
         self.chat = None
+        self._active_chats = {}  # Pour gérer plusieurs sessions
+        
+        if self.api_key:
+            try:
+                self.client = genai.Client(api_key=self.api_key)
+            except Exception as e:
+                print(f"Error initializing Gemini client: {e}")
     
+    def _check_config(self):
+        """Vérifie si le service est prêt"""
+        if not self.api_key:
+            return {
+                "success": False,
+                "error": "API Key not configured. Please add GOOGLE_API_KEY to your .env file."
+            }
+        if not self.client:
+            return {
+                "success": False,
+                "error": "Client not initialized. Check your API key and internet connection."
+            }
+        return None
+
     def analyze_video(self, video_file, context=""):
-        """
-        Analyse une vidéo et extrait les concepts clés
-        
-        Args:
-            video_file: Fichier vidéo uploadé
-            context: Contexte additionnel fourni par l'utilisateur
-        
-        Returns:
-            dict: Analyse complète avec concepts, timestamps, questions
-        """
+        """Analyse une vidéo et extrait les concepts clés"""
+        config_error = self._check_config()
+        if config_error:
+            return config_error
+
         try:
-            # Upload de la vidéo vers Gemini
-            video_data = genai.upload_file(video_file.path)
+            # Upload de la vidéo vers Gemini (Nouveau SDK utilise files.upload)
+            # Note: Le nouveau SDK requiert souvent le chemin ou un stream
+            # Ici nous utilisons le fichier local
+            upload_result = self.client.files.upload(path=video_file.path)
             
+            # Attendre que le fichier soit prêt (si nécessaire, le SDK gère souvent ça mieux)
+            # Mais pour la vidéo, c'est mieux d'attendre l'état ACTIVE
+            import time
+            while upload_result.state.name == "PROCESSING":
+                time.sleep(2)
+                upload_result = self.client.files.get(name=upload_result.name)
+                
+            if upload_result.state.name == "FAILED":
+                raise ValueError("Video processing failed")
+
             prompt = f"""
             Analyse cette vidéo éducative en profondeur. {context}
             
@@ -50,11 +77,23 @@ class GeminiService:
             5. "interactive_questions": 5-7 questions à poser pendant le visionnage
                Format: [{{"timestamp": "MM:SS", "question": "...", "hint": "...", "answer": "..."}}]
             6. "prerequisites": Connaissances préalables recommandées
+            
+            Réponds uniquement par le JSON.
             """
             
-            response = self.model.generate_content([video_data, prompt])
+            # Utilisation de config de génération pour forcer le JSON
+            generate_config = types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
+
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=[upload_result, prompt],
+                config=generate_config
+            )
             
             # Parse la réponse JSON
+            # Avec le nouveau SDK et response_mime_type, response.text est déjà du JSON propre
             analysis = json.loads(response.text)
             
             return {
@@ -69,18 +108,12 @@ class GeminiService:
             }
     
     def analyze_image_problem(self, image_file, subject_hint=""):
-        """
-        Analyse une image d'un problème (math, physique, code, etc.)
-        
-        Args:
-            image_file: Image du problème
-            subject_hint: Indice sur le domaine (optionnel)
-        
-        Returns:
-            dict: Analyse du problème avec guidance pas-à-pas
-        """
+        """Analyse une image d'un problème"""
+        config_error = self._check_config()
+        if config_error:
+            return config_error
+
         try:
-            # Lire l'image
             img = Image.open(image_file)
             
             prompt = f"""
@@ -96,9 +129,18 @@ class GeminiService:
             6. "similar_problems": 3 problèmes similaires pour pratiquer
             
             IMPORTANT: Guide l'étudiant, ne donne pas directement la réponse!
+            Réponds uniquement par le JSON.
             """
             
-            response = self.model.generate_content([img, prompt])
+            generate_config = types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
+
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=[img, prompt],
+                config=generate_config
+            )
             
             analysis = json.loads(response.text)
             
@@ -114,19 +156,19 @@ class GeminiService:
             }
     
     def analyze_document(self, document_file, focus_areas=""):
-        """
-        Analyse un document et crée une carte conceptuelle
-        
-        Args:
-            document_file: Document PDF/texte
-            focus_areas: Domaines d'intérêt spécifiques
-        
-        Returns:
-            dict: Carte conceptuelle et quiz adaptatif
-        """
+        """Analyse un document et crée une carte conceptuelle"""
+        config_error = self._check_config()
+        if config_error:
+            return config_error
+
         try:
-            # Upload du document
-            doc_data = genai.upload_file(document_file.path)
+            upload_result = self.client.files.upload(path=document_file.path)
+            
+            # Attente active si nécessaire pour les gros PDF
+            import time
+            while upload_result.state.name == "PROCESSING":
+                time.sleep(1)
+                upload_result = self.client.files.get(name=upload_result.name)
             
             prompt = f"""
             Analyse ce document académique/technique en profondeur.
@@ -143,9 +185,19 @@ class GeminiService:
                Format: [{{"level": "easy/medium/hard", "question": "...", "options": [...], "correct": 0, "explanation": "..."}}]
             6. "analogies": Analogies pour simplifier les concepts complexes
             7. "further_reading": Suggestions de lectures complémentaires
+            
+            Réponds uniquement par le JSON.
             """
             
-            response = self.model.generate_content([doc_data, prompt])
+            generate_config = types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
+            
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=[upload_result, prompt],
+                config=generate_config
+            )
             
             analysis = json.loads(response.text)
             
@@ -161,16 +213,11 @@ class GeminiService:
             }
     
     def creative_workshop(self, image_file, creative_goal=""):
-        """
-        Atelier créatif: analyse un design/esquisse et propose des améliorations
-        
-        Args:
-            image_file: Image de l'esquisse/design
-            creative_goal: Objectif créatif de l'utilisateur
-        
-        Returns:
-            dict: Feedback créatif avec suggestions
-        """
+        """Atelier créatif: analyse un design/esquisse"""
+        config_error = self._check_config()
+        if config_error:
+            return config_error
+
         try:
             img = Image.open(image_file)
             
@@ -188,9 +235,19 @@ class GeminiService:
             6. "technique_tips": Conseils techniques spécifiques
             7. "inspiration": Références/artistes similaires
             8. "next_steps": Plan d'action pour développer le projet
+            
+            Réponds uniquement par le JSON.
             """
             
-            response = self.model.generate_content([img, prompt])
+            generate_config = types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
+
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=[img, prompt],
+                config=generate_config
+            )
             
             analysis = json.loads(response.text)
             
@@ -206,76 +263,50 @@ class GeminiService:
             }
     
     def start_interactive_session(self, context, user_level="intermediate"):
-        """
-        Démarre une session de chat interactive
-        
-        Args:
-            context: Contexte de la session (résumé de l'analyse précédente)
-            user_level: Niveau de l'utilisateur
-        
-        Returns:
-            chat: Session de chat Gemini
-        """
+        """Démarre une session de chat interactive"""
+        config_error = self._check_config()
+        if config_error:
+            raise ValueError(config_error['error'])
+
         system_instruction = f"""
         Tu es NeuralSync AI, un tuteur adaptatif expert.
-        
         Contexte de la session: {context}
         Niveau de l'utilisateur: {user_level}
-        
-        Principes:
-        1. Utilise la méthode socratique - guide avec des questions
-        2. Adapte ton langage au niveau de l'utilisateur
-        3. Fournis des exemples concrets et des analogies
-        4. Encourage et célèbre les progrès
-        5. Détecte les lacunes de compréhension et ajuste
-        6. Sois enthousiaste et engageant
-        
-        Format de réponse:
-        - Concis mais complet
-        - Structure claire
-        - Emojis pour l'engagement (modérément)
+        Principes: Socratique, Adaptatif, Enthousiaste.
         """
         
-        self.chat = self.model.start_chat(history=[])
+        # Nouveau SDK: client.chats.create
+        chat = self.client.chats.create(
+            model=self.model_name,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction
+            )
+        )
         
-        # Message initial du système
-        initial_response = self.chat.send_message(system_instruction)
-        
-        return self.chat
+        return chat
     
     def send_message(self, message, chat_session=None):
-        """
-        Envoie un message dans une session interactive
-        
-        Args:
-            message: Message de l'utilisateur
-            chat_session: Session de chat (optionnel, utilise self.chat si None)
-        
-        Returns:
-            str: Réponse de Gemini
-        """
+        """Envoie un message dans une session interactive"""
+        config_error = self._check_config()
+        if config_error:
+            return f"Error: {config_error['error']}"
+
         chat = chat_session or self.chat
         
         if not chat:
-            raise ValueError("No active chat session. Call start_interactive_session first.")
+            # Fallback si pas de chat session fournie, on en crée une éphémère
+            # Mais idéalement views.py doit gérer les sessions
+            raise ValueError("No active chat session provided.")
         
         response = chat.send_message(message)
-        
         return response.text
     
     def evaluate_answer(self, question, user_answer, correct_answer, context=""):
-        """
-        Évalue la réponse d'un utilisateur et fournis un feedback détaillé
-        
-        Args:
-            question: La question posée
-            user_answer: Réponse de l'utilisateur
-            correct_answer: Réponse correcte
-            context: Contexte additionnel
-        
-        Returns:
-            dict: Évaluation avec feedback
-        """
+        """Évalue la réponse d'un utilisateur"""
+        config_error = self._check_config()
+        if config_error:
+            return {"error": config_error['error']}
+
         prompt = f"""
         Évalue cette réponse d'étudiant avec bienveillance et pédagogie.
         {context}
@@ -284,88 +315,45 @@ class GeminiService:
         Réponse de l'étudiant: {user_answer}
         Réponse attendue: {correct_answer}
         
-        Fournis une réponse JSON avec:
-        1. "is_correct": true/false
-        2. "correctness_percentage": 0-100 (peut être partiel)
-        3. "feedback": Feedback constructif et encourageant
-        4. "what_was_good": Ce qui était bien dans la réponse
-        5. "what_to_improve": Points d'amélioration spécifiques
-        6. "hint_for_next_time": Conseil pour des questions similaires
-        7. "encouragement": Message motivant personnalisé
+        Fournis une réponse JSON, incluant pourcentage, feedback, what_was_good, what_to_improve.
         """
         
-        response = self.model.generate_content(prompt)
+        generate_config = types.GenerateContentConfig(
+            response_mime_type="application/json"
+        )
         
-        evaluation = json.loads(response.text)
+        response = self.client.models.generate_content(
+            model=self.model_name,
+            contents=prompt,
+            config=generate_config
+        )
         
-        return evaluation
+        return json.loads(response.text)
     
     def generate_practice_problems(self, topic, difficulty, count=5):
-        """
-        Génère des problèmes de pratique sur un sujet
-        
-        Args:
-            topic: Sujet/concept
-            difficulty: Niveau de difficulté
-            count: Nombre de problèmes à générer
-        
-        Returns:
-            list: Liste de problèmes
-        """
+        """Génère des problèmes de pratique"""
+        config_error = self._check_config()
+        if config_error:
+            return []
+
         prompt = f"""
         Génère {count} problèmes de pratique sur: {topic}
         Niveau de difficulté: {difficulty}
-        
-        Fournis une réponse JSON avec:
-        "problems": [
-            {{
-                "id": 1,
-                "problem": "Énoncé du problème",
-                "type": "multiple_choice/open_ended/true_false",
-                "options": [...] (si applicable),
-                "solution": "Solution détaillée",
-                "hints": ["hint1", "hint2", ...],
-                "learning_objective": "Ce que ce problème enseigne"
-            }},
-            ...
-        ]
+        Format JSON requis: list under key "problems".
         """
         
-        response = self.model.generate_content(prompt)
+        generate_config = types.GenerateContentConfig(
+            response_mime_type="application/json"
+        )
+        
+        response = self.client.models.generate_content(
+            model=self.model_name,
+            contents=prompt,
+            config=generate_config
+        )
         
         result = json.loads(response.text)
-        
         return result.get("problems", [])
-    
-    def adaptive_difficulty_suggestion(self, user_stats):
-        """
-        Suggère le niveau de difficulté optimal basé sur les performances
-        
-        Args:
-            user_stats: Statistiques de l'utilisateur (dict)
-        
-        Returns:
-            dict: Recommandations de difficulté
-        """
-        prompt = f"""
-        Analyse ces statistiques d'apprentissage et recommande le niveau optimal:
-        
-        {json.dumps(user_stats, indent=2)}
-        
-        Fournis une réponse JSON avec:
-        1. "recommended_level": Level recommandé
-        2. "reasoning": Explication de la recommandation
-        3. "strengths": Domaines de force identifiés
-        4. "areas_to_focus": Domaines à travailler
-        5. "learning_pace": Rythme d'apprentissage (slow/medium/fast)
-        6. "motivation_message": Message personnalisé motivant
-        """
-        
-        response = self.model.generate_content(prompt)
-        
-        recommendation = json.loads(response.text)
-        
-        return recommendation
 
 
 # Instance singleton du service

@@ -1,0 +1,29 @@
+/* ============================================
+   PROGRESS BAR ENHANCEMENTS
+   ============================================ */
+.progress {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-full);
+    height: 8px;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.progress-bar {
+    background: var(--gradient-primary);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+}
+
+/* Loading Modal Tweaks */
+#loadingModal .modal-content {
+    background: rgba(18, 18, 24, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#loadingPercentage {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--primary-400);
+}
