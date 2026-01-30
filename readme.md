@@ -307,9 +307,8 @@ The **adaptive difficulty system** analyzes user responses and adjusts question 
 Built with Django backend and modern frontend, KacheleNeuralSync Live demonstrates Gemini 3's potential to revolutionize education through truly personalized, adaptive learning experiences.
 
 ### Links
-- **Public Demo:** [Deploy to Vercel/Railway/PythonAnywhere]
-- **Code Repository:** https://github.com/yourusername/neuralsync-live
-- **Demo Video:** [Upload to YouTube]
+- **Code Repository:** [github.com/heritiernkh/kachele_neural_sync](https://github.com/heritiernkh/kachele_neural_sync)
+- **Demo Video:** [Coming Soon]
 
 ---
 

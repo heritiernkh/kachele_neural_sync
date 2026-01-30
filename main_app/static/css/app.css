@@ -4,7 +4,6 @@
 
 .app-container {
     padding-top: 80px;
-    min-height: 100vh;
 }
 
 /* Mode Selector */
@@ -81,9 +80,6 @@
 
 /* Workspace */
 .workspace-area {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: var(--space-xl);
     min-height: calc(100vh - 160px);
 }
 
@@ -150,17 +146,14 @@
     transform: scale(1.02);
 }
 
-/* Chat Section */
 .chat-section {
     display: flex;
     flex-direction: column;
-    height: 500px;
-    /* Réduit de 600px */
+    min-height: 400px;
 }
 
 .chat-messages {
     flex: 1;
-    overflow-y: auto;
     padding: var(--space-lg);
     background: rgba(255, 255, 255, 0.02);
     border-radius: var(--radius-lg);

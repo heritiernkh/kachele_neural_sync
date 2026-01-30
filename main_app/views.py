@@ -63,12 +63,28 @@ def get_mock_analysis(filename, mode):
     }
 
 def get_mock_response(question, analysis_summary):
-    """Génère une réponse pédagogique simulée basée sur l'analyse si l'API est saturée"""
-    q = question.lower()
-    if "aider" in q or "comment" in q or "expliquer" in q:
-        return f"C'est une excellente question ! En me basant sur l'analyse du contenu, je te suggère de te concentrer sur les concepts clés identifiés. La méthode socratique nous invite à réfléchir : à ton avis, quel est l'élément le plus complexe dans ce que nous venons de voir ? (Note: Je suis en mode Démo sécurisé suite à une saturation du quota API)."
+    """Génère une réponse pédagogique simulée intelligente basée sur l'analyse en cas de saturation API"""
+    import random
     
-    return "Je comprends ta question. Dans le cadre de notre session Kachele NeuralSync, nous cherchons à approfondir ce sujet. Peux-tu me préciser quel aspect te pose le plus de difficultés dans l'analyse que nous avons obtenue ? (Note: Mode Démo activé)."
+    # Extraire des informations de l'analyse pour personnaliser la réponse
+    concepts = analysis_summary.get('key_concepts', [])
+    summary = analysis_summary.get('summary', "notre sujet d'étude")
+    
+    # Choisir un concept aléatoire s'il y en a
+    concept_focus = f"'{concepts[0]}'" if concepts else "ce contenu"
+    
+    responses = [
+        f"C'est une réflexion intéressante. En regardant l'analyse sur {concept_focus}, comment penses-tu que cela se connecte à ta question ?",
+        f"Je vois où tu veux en venir. Si l'on considère le résumé de notre analyse ({summary[:60]}...), quel lien fais-tu avec ton interrogation ?",
+        f"Dans l'esprit de Kachele NeuralSync, j'aimerais te retourner la question : en te basant sur les concepts clés comme {concept_focus}, quelle serait ta première intuition ?",
+        f"Ton approche est pertinente. Pour approfondir {concept_focus}, quel aspect spécifique de l'analyse te semble le plus lié à ce que tu viens de demander ?",
+        f"C'est un excellent point de départ. Si tu devais expliquer {concept_focus} à quelqu'un d'autre en te basant sur notre session, que dirais-tu ?"
+    ]
+    
+    # Message de pied de page pour la transparence
+    note = "\n\n*(Note: Mode Démo Intelligent activé - Gemini est actuellement en haute performance de calcul)*"
+    
+    return random.choice(responses) + note
 from .models import LearningSession, UploadedContent, Interaction, ConceptMap, UserProgress
 from .gemini_service import gemini_service
 from django.contrib.auth.decorators import login_required
@@ -370,27 +386,21 @@ def ask_question(request):
 
         latest_upload = session.uploads.filter(analysis_completed=True).last()
         
-        if not latest_upload:
-            any_upload = session.uploads.exists()
-            if any_upload:
-                return JsonResponse({
-                    'success': False,
-                    'error': "L'analyse de votre fichier n'a pas pu aboutir (elle a peut-être échoué à cause du quota API). Veuillez ré-uploader le fichier ou attendre une minute."
-                }, status=400)
-            else:
-                return JsonResponse({
-                    'success': False,
-                    'error': "Veuillez d'abord uploader un contenu pour que je puisse l'analyser avant de commencer la discussion."
-                }, status=400)
-        
-        analysis_summary = json.loads(latest_upload.analysis_summary)
-        
-        # Préparer le contexte pour Gemini
-        full_context = f"""
-        Session Mode: {session.get_mode_display()}
-        Content Analysis: {json.dumps(analysis_summary, indent=2)}
-        Additional Context: {json.dumps(context, indent=2)}
-        """
+        if latest_upload:
+            analysis_summary = json.loads(latest_upload.analysis_summary)
+            # Préparer le contexte pour Gemini basé sur le fichier
+            full_context = f"""
+            Session Mode: {session.get_mode_display()}
+            Content Analysis: {json.dumps(analysis_summary, indent=2)}
+            Additional Context: {json.dumps(context, indent=2)}
+            """
+        else:
+            # Mode "Chat Direct" sans fichier
+            full_context = f"""
+            Session Mode: {session.get_mode_display()} (Mode Text Direct)
+            L'utilisateur a choisi de discuter directement sans uploader de fichier.
+            Tu agis comme un tuteur généraliste expert utilisant la méthode socratique.
+            """
         
         # Démarrer ou continuer la session de chat
         if not hasattr(gemini_service, '_active_chats'):

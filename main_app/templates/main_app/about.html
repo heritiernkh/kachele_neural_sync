@@ -15,49 +15,92 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 animate-slide-up">
                 <div class="card glassmorphism border-0 p-4 p-md-5">
-                    <h2 class="h3 fw-bold mb-4">Notre Mission</h2>
-                    <p class="text-secondary mb-5 lead">
-                        KacheleNeuralSync Live transforme l'apprentissage traditionnel en une expérience adaptative et
-                        personnalisée.
-                        Nous croyons que l'éducation doit s'adapter à l'apprenant, et non l'inverse. En exploitant les
-                        capacités multimodales de Gemini 3, nous créons un tuteur qui voit, entend et comprend le
-                        contexte
-                        tout comme le ferait un expert humain.
+                    <!-- Inspiration -->
+                    <h2 class="h3 fw-bold mb-4">## Inspiration</h2>
+                    <p class="text-secondary mb-5">
+                        Notre inspiration est née d'un constat simple : l'éducation est souvent trop rigide. Que ce soit
+                        sur un MOOC ou en classe, les apprenants doivent suivre le même rythme. Nous avons rêvé d'un
+                        monde où chaque étudiant a accès à un tuteur personnel d'élite qui s'adapte à lui en temps réel.
+                        Le lancement de <strong>Gemini 3</strong> a été l'élément déclencheur pour transformer cette
+                        vision en réalité.
                     </p>
 
-                    <h2 class="h3 fw-bold mb-4">Propulsé par Gemini 3</h2>
-                    <p class="text-secondary mb-3">
-                        Cette plateforme met en avant les capacités incroyables de l'IA multimodale Gemini 3 :
+                    <!-- What it does -->
+                    <h2 class="h3 fw-bold mb-4">## What it does</h2>
+                    <p class="text-secondary mb-4">
+                        KacheleNeuralSync Live est une plateforme d'apprentissage adaptative multimodale. Elle permet de
+                        :
                     </p>
                     <ul class="list-unstyled d-grid gap-3 mb-5 text-secondary">
-                        <li class="d-flex align-items-center"><i
-                                class="fas fa-check-circle text-success me-3"></i>Analyse en temps réel de vidéos et de
-                            documents
+                        <li class="d-flex align-items-start"><i class="fas fa-video text-primary mt-1 me-3"></i>
+                            <div><strong>Video Learning :</strong> Analyse des vidéos en temps réel avec questions
+                                interactives aux moments clés.</div>
                         </li>
-                        <li class="d-flex align-items-center"><i
-                                class="fas fa-check-circle text-success me-3"></i>Raisonnement avancé pour un guidage
-                            pas à pas</li>
-                        <li class="d-flex align-items-center"><i
-                                class="fas fa-check-circle text-success me-3"></i>Interactions à faible latence pour un
-                            apprentissage fluide</li>
-                        <li class="d-flex align-items-center"><i
-                                class="fas fa-check-circle text-success me-3"></i>Difficulté adaptative et retours
-                            personnalisés</li>
+                        <li class="d-flex align-items-start"><i class="fas fa-calculator text-info mt-1 me-3"></i>
+                            <div><strong>Visual Solver :</strong> Résolution socratique de problèmes complexes à partir
+                                d'une simple photo.</div>
+                        </li>
+                        <li class="d-flex align-items-start"><i class="fas fa-file-alt text-success mt-1 me-3"></i>
+                            <div><strong>Doc Intelligence :</strong> Transformation de PDF denses en cartes
+                                conceptuelles et quiz dynamiques.</div>
+                        </li>
+                        <li class="d-flex align-items-start"><i class="fas fa-palette text-warning mt-1 me-3"></i>
+                            <div><strong>Creative Workshop :</strong> Feedback expert sur les designs et esquisses
+                                visuelles.</div>
+                        </li>
                     </ul>
 
-                    <div
-                        class="bg-dark bg-opacity-50 p-4 rounded-4 border border-secondary border-opacity-25 text-center">
-                        <h3 class="h5 fw-bold mb-3">L'Équipe</h3>
-                        <p class="text-muted mb-0">
-                            Créé avec passion pour le Gemini 3 Global Hackathon.
-                            Nous repoussons les limites de l'éducation assistée par l'IA.
-                        </p>
-                    </div>
+                    <!-- How we built it -->
+                    <h2 class="h3 fw-bold mb-4">## How we built it</h2>
+                    <p class="text-secondary mb-5">
+                        Le projet est construit sur un socle <strong>Django 5.2</strong> robuste. Nous avons intégré le
+                        nouveau <strong>SDK Google GenAI</strong> pour exploiter Gemini 3 en mode multimodal.
+                        L'interface utilise du Vanilla CSS avec des effets de <em>glassmorphism</em> et des
+                        micro-animations pour une expérience utilisateur premium. Le moteur pédagogique utilise des
+                        instructions système sophistiquées pour forcer l'usage de la méthode socratique.
+                    </p>
 
-                    <div class="text-center mt-5">
-                        <a href="{% url 'main_app:app' %}" class="btn btn-primary btn-lg rounded-pill px-5">
-                            <span>Essayer KacheleNeuralSync Live</span>
-                            <i class="fas fa-arrow-right ms-2"></i>
+                    <!-- Challenges we ran into -->
+                    <h2 class="h3 fw-bold mb-4">## Challenges we ran into</h2>
+                    <p class="text-secondary mb-5">
+                        Le défi majeur a été de dompter la "générosité" de l'IA : elle veut souvent donner la solution
+                        directement. Créer un <strong>tuteur socratique</strong> qui guide sans révéler a demandé un
+                        raffinement extrême du prompt engineering. La gestion des flux vidéos et la synchronisation des
+                        horodatages ($MM:SS$) ont également nécessité une logique complexe d'extraction de données
+                        structurées JSON.
+                    </p>
+
+                    <!-- Accomplishments that we're proud of -->
+                    <h2 class="h3 fw-bold mb-4">## Accomplishments that we're proud of</h2>
+                    <p class="text-secondary mb-5">
+                        Nous sommes fiers d'avoir créé un système qui peut "voir" une équation complexe comme $$
+                        \frac{d}{dx}(x^2 + 3x + 5) $$ et engager une discussion pédagogique plutôt que de simplement
+                        cracher le résultat. L'esthétique "Neural" du site et la fluidité des interactions avec Gemini 3
+                        sont également des sources de fierté.
+                    </p>
+
+                    <!-- What we learned -->
+                    <h2 class="h3 fw-bold mb-4">## What we learned</h2>
+                    <p class="text-secondary mb-5">
+                        Nous avons maîtrisé le passage au nouveau SDK Gemini 3, approfondi nos connaissances en
+                        traitement multimodal asynchrone et découvert la puissance de l'IA pour personnaliser
+                        l'éducation à grande échelle. Nous avons appris que l'IA ne remplace pas le tuteur, elle
+                        l'augmente.
+                    </p>
+
+                    <!-- What's next -->
+                    <h2 class="h3 fw-bold mb-4 text-gradient">## What's next for Kachele Live</h2>
+                    <p class="text-secondary mb-5">
+                        L'étape suivante est l'intégration des capacités <strong>Audio natives</strong> de Gemini pour
+                        des discussions vocales fluides, le développement d'un tableau de bord pour les enseignants afin
+                        de suivre les lacunes des élèves, et une application mobile pour apprendre n'importe où,
+                        n'importe quand.
+                    </p>
+
+                    <div class="text-center mt-2">
+                        <a href="{% url 'main_app:app' %}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg">
+                            <span>Explorer la Plateforme</span>
+                            <i class="fas fa-rocket ms-2"></i>
                         </a>
                     </div>
                 </div>

@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="app-container pt-5 mt-4 min-vh-100 position-relative">
+<div class="app-container pt-5 mt-4">
     <!-- Mode Selector Section -->
     <section class="mode-selector-section py-5">
         <div class="container">
@@ -90,12 +90,12 @@
     </section>
 
     <!-- Workspace Area (Hidden Initially) -->
-    <section class="workspace-area animate-slide-up" id="workspaceArea" style="display: none;">
+    <section class="workspace-area animate-slide-up" id="workspaceArea" style="display: none; padding-bottom: 200px;">
         <div class="container pb-5">
             <div class="row g-4">
                 <!-- Sidebar -->
-                <div class="col-lg-4">
-                    <div class="card glassmorphism sticky-top" style="top: 100px; z-index: 10;">
+                <div class="col-lg-3">
+                    <div class="card glassmorphism">
                         <div class="card-body p-4">
                             <div class="d-flex align-items-center mb-4">
                                 <button class="btn btn-outline-secondary btn-sm me-auto" id="backBtn">
@@ -137,88 +137,102 @@
                 </div>
 
                 <!-- Main Content Area -->
-                <div class="col-lg-8">
-                    <div class="card glassmorphism border-0 h-100" style="min-height: 500px;">
-                        <div class="card-body p-4 p-lg-5">
+                <div class="col-lg-9">
+                    <div class="card glassmorphism border-0" style="min-height: 700px;">
+                        <div class="card-body p-4 p-lg-5 d-flex flex-column">
+                            <div id="workspaceContent" class="flex-grow-1">
 
-                            <!-- Upload Area -->
-                            <div class="upload-section h-100 d-flex align-items-start justify-content-center pt-4"
-                                id="uploadSection">
-                                <div class="upload-card text-center w-100 p-5 border-2 border-dashed border-secondary border-opacity-25 rounded-4 transition-base hover-glow"
-                                    style="max-width: 500px; cursor: pointer;">
-                                    <div class="mb-4 text-primary display-4">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                    </div>
-                                    <h2 class="h3 mb-3">Upload Content</h2>
-                                    <p class="text-muted mb-4" id="uploadHint">
-                                        Drag and drop your file here, or click to browse
-                                    </p>
+                                <!-- Upload Area -->
+                                <div class="upload-section h-100 d-flex align-items-start justify-content-center pt-4"
+                                    id="uploadSection">
+                                    <div class="upload-card text-center w-100 p-5 border-2 border-dashed border-secondary border-opacity-25 rounded-4 transition-base hover-glow"
+                                        style="max-width: 500px; cursor: pointer;">
+                                        <div class="mb-4 text-primary display-4">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <h2 class="h3 mb-3">Upload Content</h2>
+                                        <p class="text-muted mb-4" id="uploadHint">
+                                            Drag and drop your file here, or click to browse
+                                        </p>
 
-                                    <input type="file" id="fileInput" accept="" style="display: none;">
+                                        <input type="file" id="fileInput" accept="" style="display: none;">
 
-                                    <button class="btn btn-primary btn-lg px-4 rounded-pill" id="browseBtn">
-                                        <i class="fas fa-folder-open me-2"></i> Browse Files
-                                    </button>
+                                        <button class="btn btn-primary btn-lg px-4 rounded-pill mb-3" id="browseBtn">
+                                            <i class="fas fa-folder-open me-2"></i> Browse Files
+                                        </button>
 
-                                    <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap" id="fileTypes">
-                                        <span
-                                            class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">MP4</span>
-                                        <span
-                                            class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">MOV</span>
-                                        <span
-                                            class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">AVI</span>
-                                    </div>
-                                </div>
-                            </div>
+                                        <div class="mb-3">
+                                            <span class="text-muted small">OR</span>
+                                        </div>
 
-                            <!-- 2. Zone de Saisie (Appears after upload) -->
-                            <div class="chat-input-section mb-4" id="chatInputSection" style="display: none;">
-                                <div
-                                    class="chat-input-container d-flex gap-2 p-3 bg-dark bg-opacity-25 rounded-4 border border-primary border-opacity-25 shadow-sm">
-                                    <textarea class="form-control bg-transparent border-0 text-white shadow-none"
-                                        id="chatInput" placeholder="Pose ta question ici sur ce fichier..." rows="1"
-                                        style="resize: none; font-size: 1.1rem;"></textarea>
-                                    <button class="btn btn-primary rounded-circle" id="sendBtn"
-                                        style="width: 42px; height: 42px; flex-shrink: 0;">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                </div>
-                            </div>
+                                        <button class="btn btn-outline-primary rounded-pill px-4" id="startWithTextBtn">
+                                            <i class="fas fa-keyboard me-2"></i> Démarrer par texte
+                                        </button>
 
-                            <!-- 3. Zone de Réponse (Analysis + Chat History) -->
-                            <div class="responses-area" id="responsesArea">
-                                <!-- Automated Analysis Section -->
-                                <div class="analysis-section mb-4" id="analysisSection" style="display: none;">
-                                    <div
-                                        class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
-                                        <h2 class="h5 mb-0">Analyse du Contenu</h2>
-                                        <span class="badge bg-gradient-primary rounded-pill px-3 py-1 small">Gemini
-                                            3</span>
-                                    </div>
-                                    <div class="analysis-content vstack gap-3" id="analysisContent">
-                                        <!-- Dynamic content -->
+                                        <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap" id="fileTypes">
+                                            <span
+                                                class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">MP4</span>
+                                            <span
+                                                class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">MOV</span>
+                                            <span
+                                                class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">AVI</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Interactive Discussion Section -->
-                                <div class="chat-section" id="chatSection" style="display: none;">
-                                    <div
-                                        class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
-                                        <h2 class="h5 mb-0">Discussion Interactive</h2>
-                                        <button class="btn btn-outline-warning btn-sm rounded-pill py-0"
-                                            id="requestHintBtn">Indices</button>
+
+                                <!-- 3. Zone de Réponse (Analysis + Chat History) -->
+                                <div class="responses-area" id="responsesArea">
+                                    <!-- Automated Analysis Section -->
+                                    <div class="analysis-section mb-4" id="analysisSection" style="display: none;">
+                                        <div
+                                            class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                                            <h2 class="h5 mb-0">Analyse du Contenu</h2>
+                                            <span class="badge bg-gradient-primary rounded-pill px-3 py-1 small">Gemini
+                                                3</span>
+                                        </div>
+                                        <div class="analysis-content vstack gap-3" id="analysisContent">
+                                            <!-- Dynamic content -->
+                                        </div>
                                     </div>
-                                    <div class="chat-messages vstack gap-3" id="chatMessages">
-                                        <!-- Message bubbles -->
+
+                                    <!-- Interactive Discussion Section -->
+                                    <div class="chat-section" id="chatSection" style="display: none;">
+                                        <div
+                                            class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                                            <h2 class="h5 mb-0">Discussion Interactive</h2>
+                                            <button class="btn btn-outline-warning btn-sm rounded-pill py-0"
+                                                id="requestHintBtn">Indices</button>
+                                        </div>
+                                        <div class="chat-messages vstack gap-3 mb-4" id="chatMessages">
+                                            <!-- Message bubbles -->
+                                        </div>
+
+                                        <div class="chat-input-section mt-5" id="chatInputSection"
+                                            style="display: none;">
+                                            <div
+                                                class="chat-input-container d-flex gap-2 p-2 bg-dark bg-opacity-50 rounded-4 border border-primary shadow-lg">
+                                                <textarea
+                                                    class="form-control bg-transparent border-0 text-white shadow-none fs-5 py-2 px-3 flex-grow-1"
+                                                    id="chatInput" placeholder="Écris ton message ici..." rows="1"
+                                                    style="resize: none; min-height: 48px; overflow-y: hidden;"></textarea>
+                                                <button
+                                                    class="btn btn-primary rounded-pill px-4 align-self-end mb-1 me-1"
+                                                    id="sendBtn" style="height: 44px; flex-shrink: 0;">
+                                                    <i class="fas fa-paper-plane me-2"></i> Envoyer
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
+                            </div> <!-- End workspaceContent -->
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+            <!-- Marge de sécurité finale -->
+            <div class="py-5 mt-5"></div>
     </section>
 </div>
 
@@ -227,13 +241,15 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 glassmorphism">
             <div class="modal-body text-center p-5">
-                <div class="d-inline-block display-1 mb-4 animate-pulse-glow">To</div>
+                <div class="d-inline-block display-1 mb-4 animate-pulse-glow">
+                    <i class="fas fa-brain text-gradient"></i>
+                </div>
                 <h3 class="h4 mb-2">Analyzing with Gemini 3...</h3>
                 <p class="text-muted mb-4" id="loadingMessage">Processing your content</p>
 
-                <div class="progress bg-secondary bg-opacity-25" style="height: 6px;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-gradient-primary"
-                        id="progressFill" role="progressbar" style="width: 0%"></div>
+                <div class="progress bg-secondary bg-opacity-25" style="height: 10px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressFill"
+                        role="progressbar" style="width: 0%; background: var(--gradient-primary) !important;"></div>
                 </div>
             </div>
         </div>
@@ -241,10 +257,6 @@
 </div>
 
 <style>
-    .demo-sidebar {
-        top: 100px;
-    }
-
     .mode-card {
         cursor: pointer;
         transition: transform 0.3s ease;
@@ -272,6 +284,38 @@
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-bottom-left-radius: 4px;
+    }
+
+    /* Force Footer to stay away */
+    .workspace-area {
+        margin-bottom: 300px !important;
+        display: block !important;
+    }
+
+    /* Full Width Chat Input */
+    .chat-input-section {
+        margin-top: 3rem !important;
+        padding-bottom: 2rem !important;
+        width: 100% !important;
+    }
+
+    .chat-input-container {
+        transition: all 0.3s ease;
+        background: rgba(10, 10, 15, 0.95) !important;
+        backdrop-filter: blur(20px);
+        width: 100% !important;
+        max-width: none !important;
+        border: 1px solid var(--primary-500) !important;
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.2) !important;
+    }
+
+    #workspaceContent {
+        display: block !important;
+        min-height: 800px;
+    }
+
+    .responses-area {
+        width: 100% !important;
     }
 </style>
 {% endblock %}

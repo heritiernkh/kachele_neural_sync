@@ -79,9 +79,12 @@ class GeminiService:
             Réponds uniquement par le JSON.
             """
             
-            # Utilisation de config de génération pour forcer le JSON
+            # Utilisation de config de génération pour forcer le JSON et la haute résolution
             generate_config = types.GenerateContentConfig(
-                response_mime_type="application/json"
+                response_mime_type="application/json",
+                temperature=0.85,
+                thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
+                media_resolution="MEDIA_RESOLUTION_HIGH"
             )
 
             response = self.client.models.generate_content(
@@ -131,7 +134,10 @@ class GeminiService:
             """
             
             generate_config = types.GenerateContentConfig(
-                response_mime_type="application/json"
+                response_mime_type="application/json",
+                temperature=0.85,
+                thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
+                media_resolution="MEDIA_RESOLUTION_HIGH"
             )
 
             response = self.client.models.generate_content(
@@ -189,7 +195,10 @@ class GeminiService:
             """
             
             generate_config = types.GenerateContentConfig(
-                response_mime_type="application/json"
+                response_mime_type="application/json",
+                temperature=0.85,
+                thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
+                media_resolution="MEDIA_RESOLUTION_HIGH"
             )
             
             response = self.client.models.generate_content(
@@ -240,7 +249,10 @@ class GeminiService:
             """
             
             generate_config = types.GenerateContentConfig(
-                response_mime_type="application/json"
+                response_mime_type="application/json",
+                temperature=0.85,
+                thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
+                media_resolution="MEDIA_RESOLUTION_HIGH"
             )
 
             response = self.client.models.generate_content(
@@ -269,18 +281,29 @@ class GeminiService:
             raise ValueError(config_error['error'])
 
         system_instruction = f"""
-        Tu es Kachele NeuralSync AI, un tuteur adaptatif expert.
-        Contexte de la session: {context}
-        Niveau de l'utilisateur: {user_level}
-        Principes: Socratique, Adaptatif, Enthousiaste.
+        Tu es Kachele NeuralSync AI, un tuteur adaptatif expert. 
+        Tu utilises la méthode socratique pour guider l'étudiant. Ne donne jamais la solution directement. 
+        Analyse le contenu (Vidéo, Image, PDF) et pose des questions pour amener l'étudiant à découvrir la réponse par lui-même. 
+        Sois encourageant et adapte ton langage au niveau de l'utilisateur.
+        
+        Contexte spécifique de cette session: {context}
+        Niveau actuel de l'utilisateur: {user_level}
         """
+        
+        # Configuration avancée basée sur Google AI Studio
+        generate_config = types.GenerateContentConfig(
+            temperature=0.85,
+            thinking_config=types.ThinkingConfig(
+                thinking_level="HIGH",
+            ),
+            media_resolution="MEDIA_RESOLUTION_HIGH",
+            system_instruction=system_instruction
+        )
         
         # Nouveau SDK: client.chats.create
         chat = self.client.chats.create(
             model=self.model_name,
-            config=types.GenerateContentConfig(
-                system_instruction=system_instruction
-            )
+            config=generate_config
         )
         
         return chat

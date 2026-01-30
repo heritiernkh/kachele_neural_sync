@@ -46,7 +46,8 @@ function showLoadingModal(message = 'Processing...') {
     const progressFill = document.getElementById('progressFill');
     if (progressFill) {
         progressFill.style.width = '0%';
-        progressFill.className = 'progress-bar bg-gradient-primary'; // Reset animations
+        // On garde les classes Bootstrap pour l'animation
+        progressFill.className = 'progress-bar progress-bar-striped progress-bar-animated';
     }
 
     bsLoadingModal.show();
@@ -152,13 +153,34 @@ function selectMode(mode) {
                 Drag and drop your file here, or click to browse
             </p>
             <input type="file" id="fileInput" accept="" style="display: none;">
-            <button class="btn btn-primary btn-lg px-4 rounded-pill" id="browseBtn">
+            <button class="btn btn-primary btn-lg px-4 rounded-pill mb-3" id="browseBtn">
                 <i class="fas fa-folder-open me-2"></i> Browse Files
+            </button>
+            <div class="mb-3">
+                <span class="text-muted small">OR</span>
+            </div>
+            <button class="btn btn-outline-primary rounded-pill px-4" id="startWithTextBtn">
+                <i class="fas fa-keyboard me-2"></i> Démarrer par texte
             </button>
             <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap" id="fileTypes"></div>
         `;
-        // Re-bind click event to card and input (since we replaced innerHTML)
-        uploadCard.onclick = () => document.getElementById('fileInput').click();
+        // Re-bind events
+        const newFileInput = document.getElementById('fileInput');
+        newFileInput.onchange = (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        };
+
+        document.getElementById('browseBtn').onclick = (e) => {
+            e.stopPropagation();
+            newFileInput.click();
+        };
+        document.getElementById('startWithTextBtn').onclick = (e) => {
+            e.stopPropagation();
+            switchToTextMode();
+        };
+        uploadCard.onclick = () => newFileInput.click();
     }
 
     chatInputSection.style.display = 'none';
@@ -176,6 +198,26 @@ function selectMode(mode) {
 // ============================================
 // 2. SESSION MANAGEMENT
 // ============================================
+function switchToTextMode() {
+    uploadSection.style.display = 'none';
+    chatInputSection.style.display = 'block';
+    chatSection.style.display = 'block';
+
+    // Welcome message for text mode
+    const welcomeMsg = `Bonjour ! Je suis ton tuteur Kachele Neural Sync Live. Comment puis-je t'aider aujourd'hui ? Tu peux me poser une question sur n'importe quel sujet.`;
+    addMessage('ai', welcomeMsg);
+    chatInput.focus();
+}
+
+// Initial binding for the button present in HTML
+const initialStartWithTextBtn = document.getElementById('startWithTextBtn');
+if (initialStartWithTextBtn) {
+    initialStartWithTextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        switchToTextMode();
+    });
+}
+
 async function createSession(mode) {
     try {
         const response = await fetch('/api/session/create/', {
@@ -274,7 +316,7 @@ async function handleFileUpload(file) {
                     progressFill.style.width = `${percentComplete}%`;
 
                     if (percentComplete === 100) {
-                        updateLoadingMessage('Analyse par Gemini 2.5 Flash en cours...');
+                        updateLoadingMessage('Analyse par Gemini 3 en cours...');
                         progressFill.classList.add('progress-bar-striped', 'progress-bar-animated');
                     } else {
                         updateLoadingMessage(`Téléchargement: ${percentComplete}%`);
@@ -521,10 +563,25 @@ function startInteractiveChat(initialQuestion = null, correctAnswer = null) {
 }
 
 sendBtn.addEventListener('click', sendMessage);
+chatInput.addEventListener('input', function () {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+
+    // Empêcher que ça devienne trop grand
+    if (this.scrollHeight > 200) {
+        this.style.overflowY = 'auto';
+        this.style.height = '200px';
+    } else {
+        this.style.overflowY = 'hidden';
+    }
+});
+
 chatInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
+        // Reset height after sending
+        chatInput.style.height = '48px';
     }
 });
 
@@ -540,6 +597,7 @@ async function sendMessage() {
     // Add user message
     addMessage('user', message);
     chatInput.value = '';
+    chatInput.style.height = '48px';
 
     // Check if this is an answer to a question
     const currentQuestion = chatInput.dataset.currentQuestion;
@@ -715,6 +773,11 @@ function addMessage(sender, text) {
     }
 
     chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Si la zone de messages grandit, on s'assure que le champ de texte en bas est visible
+    setTimeout(() => {
+        chatInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
 }
 
 
