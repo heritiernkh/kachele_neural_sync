@@ -6,7 +6,7 @@ app_name = 'main_app'
 urlpatterns = [
     # Pages principales
     path('', views.index, name='index'),
-    path('demo/', views.demo, name='demo'),
+    path('app/', views.app, name='app'),
     path('features/', views.features, name='features'),
     path('about/', views.about, name='about'),
     

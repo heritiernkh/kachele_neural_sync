@@ -298,7 +298,7 @@ if ('PerformanceObserver' in window) {
 // ============================================
 // 10. EXPORT UTILITIES
 // ============================================
-window.NeuralSync = {
+window.KacheleNeuralSync = {
     formatFileSize,
     formatDuration,
     showLoading,
@@ -309,7 +309,7 @@ window.NeuralSync = {
     Storage
 };
 
-console.log('%c🧠 NeuralSync Live %cpowered by Gemini 3',
+console.log('%c🧠 KacheleNeuralSync Live %cpowered by Gemini 3',
     'color: #6366f1; font-size: 20px; font-weight: bold;',
     'color: #a855f7; font-size: 14px;'
 );

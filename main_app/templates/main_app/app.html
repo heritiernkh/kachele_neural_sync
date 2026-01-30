@@ -1,14 +1,14 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
 
-{% block title %}Demo - NeuralSync Live{% endblock %}
+{% block title %}KacheleNeuralSync Live{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/demo.css' %}">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="demo-container pt-5 mt-4 min-vh-100 position-relative">
+<div class="app-container pt-5 mt-4 min-vh-100 position-relative">
     <!-- Mode Selector Section -->
     <section class="mode-selector-section py-5">
         <div class="container">
@@ -89,8 +89,8 @@
         </div>
     </section>
 
-    <!-- Interactive Demo Area (Hidden Initially) -->
-    <section class="demo-area animate-slide-up" id="demoArea" style="display: none;">
+    <!-- Workspace Area (Hidden Initially) -->
+    <section class="workspace-area animate-slide-up" id="workspaceArea" style="display: none;">
         <div class="container pb-5">
             <div class="row g-4">
                 <!-- Sidebar -->
@@ -138,11 +138,11 @@
 
                 <!-- Main Content Area -->
                 <div class="col-lg-8">
-                    <div class="card glassmorphism border-0 h-100" style="min-height: 600px;">
+                    <div class="card glassmorphism border-0 h-100" style="min-height: 500px;">
                         <div class="card-body p-4 p-lg-5">
 
                             <!-- Upload Area -->
-                            <div class="upload-section h-100 d-flex align-items-center justify-content-center"
+                            <div class="upload-section h-100 d-flex align-items-start justify-content-center pt-4"
                                 id="uploadSection">
                                 <div class="upload-card text-center w-100 p-5 border-2 border-dashed border-secondary border-opacity-25 rounded-4 transition-base hover-glow"
                                     style="max-width: 500px; cursor: pointer;">
@@ -171,46 +171,46 @@
                                 </div>
                             </div>
 
-                            <!-- Analysis Display -->
-                            <div class="analysis-section" id="analysisSection" style="display: none;">
+                            <!-- 2. Zone de Saisie (Appears after upload) -->
+                            <div class="chat-input-section mb-4" id="chatInputSection" style="display: none;">
                                 <div
-                                    class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
-                                    <h2 class="h4 mb-0">Analysis Complete</h2>
-                                    <span class="badge bg-gradient-primary rounded-pill px-3 py-2">
-                                        <i class="fas fa-robot me-2"></i>Gemini 3
-                                    </span>
-                                </div>
-
-                                <div class="analysis-content vstack gap-4" id="analysisContent">
-                                    <!-- Dynamic content will be inserted here -->
-                                </div>
-                            </div>
-
-                            <!-- Interactive Chat -->
-                            <div class="chat-section d-flex flex-column h-100" id="chatSection"
-                                style="display: none; height: 600px !important;">
-                                <div
-                                    class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary border-opacity-25">
-                                    <h3 class="h5 mb-0">Interactive Learning</h3>
-                                    <button class="btn btn-outline-warning btn-sm rounded-pill" id="requestHintBtn">
-                                        <i class="fas fa-lightbulb me-2"></i>Hint
-                                    </button>
-                                </div>
-
-                                <div class="chat-messages flex-grow-1 overflow-auto p-3 rounded-4 bg-dark bg-opacity-25 mb-3"
-                                    id="chatMessages">
-                                    <!-- Messages will be added here -->
-                                </div>
-
-                                <div class="chat-input-container d-flex gap-2">
-                                    <textarea
-                                        class="form-control bg-dark bg-opacity-50 border-secondary border-opacity-50 text-white"
-                                        id="chatInput" placeholder="Type your answer or question..." rows="1"
-                                        style="resize: none;"></textarea>
+                                    class="chat-input-container d-flex gap-2 p-3 bg-dark bg-opacity-25 rounded-4 border border-primary border-opacity-25 shadow-sm">
+                                    <textarea class="form-control bg-transparent border-0 text-white shadow-none"
+                                        id="chatInput" placeholder="Pose ta question ici sur ce fichier..." rows="1"
+                                        style="resize: none; font-size: 1.1rem;"></textarea>
                                     <button class="btn btn-primary rounded-circle" id="sendBtn"
                                         style="width: 42px; height: 42px; flex-shrink: 0;">
                                         <i class="fas fa-paper-plane"></i>
                                     </button>
+                                </div>
+                            </div>
+
+                            <!-- 3. Zone de Réponse (Analysis + Chat History) -->
+                            <div class="responses-area" id="responsesArea">
+                                <!-- Automated Analysis Section -->
+                                <div class="analysis-section mb-4" id="analysisSection" style="display: none;">
+                                    <div
+                                        class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                                        <h2 class="h5 mb-0">Analyse du Contenu</h2>
+                                        <span class="badge bg-gradient-primary rounded-pill px-3 py-1 small">Gemini
+                                            3</span>
+                                    </div>
+                                    <div class="analysis-content vstack gap-3" id="analysisContent">
+                                        <!-- Dynamic content -->
+                                    </div>
+                                </div>
+
+                                <!-- Interactive Discussion Section -->
+                                <div class="chat-section" id="chatSection" style="display: none;">
+                                    <div
+                                        class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                                        <h2 class="h5 mb-0">Discussion Interactive</h2>
+                                        <button class="btn btn-outline-warning btn-sm rounded-pill py-0"
+                                            id="requestHintBtn">Indices</button>
+                                    </div>
+                                    <div class="chat-messages vstack gap-3" id="chatMessages">
+                                        <!-- Message bubbles -->
+                                    </div>
                                 </div>
                             </div>
 
@@ -277,5 +277,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/demo.js' %}"></script>
+<script src="{% static 'js/app.js' %}"></script>
 {% endblock %}

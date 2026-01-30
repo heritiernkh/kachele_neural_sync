@@ -5,11 +5,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="NeuralSync Live - Adaptive Learning Platform powered by Gemini 3 AI">
+    <meta name="description" content="KacheleNeuralSync Live - Adaptive Learning Platform powered by Gemini 3 AI">
     <meta name="keywords" content="AI, learning, education, Gemini 3, adaptive learning, personalized education">
-    <meta name="author" content="NeuralSync Team">
+    <meta name="author" content="KacheleNeuralSync Team">
 
-    <title>{% block title %}NeuralSync Live - AI-Powered Adaptive Learning{% endblock %}</title>
+    <title>{% block title %}KacheleNeuralSync Live - AI-Powered Adaptive Learning{% endblock %}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,6 +31,12 @@
     <link rel="stylesheet" href="{% static 'css/dark-mode-fixes.css' %}">
     <link rel="stylesheet" href="{% static 'css/progress.css' %}">
     <link rel="stylesheet" href="{% static 'css/results.css' %}">
+    <!-- Markdown & LaTeX Support -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -40,7 +46,7 @@
         <div class="container">
             <a href="{% url 'main_app:index' %}" class="navbar-brand logo d-flex align-items-center">
                 <span class="logo-icon me-2">🧠</span>
-                <span class="logo-text">NeuralSync<span class="logo-accent">Live</span></span>
+                <span class="logo-text">KacheleNeuralSync<span class="logo-accent">Live</span></span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -50,19 +56,19 @@
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav align-items-center gap-3">
                     <li class="nav-item">
-                        <a href="{% url 'main_app:index' %}" class="nav-link">Home</a>
+                        <a href="{% url 'main_app:index' %}" class="nav-link">Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'main_app:demo' %}" class="nav-link">Demo</a>
+                        <a href="{% url 'main_app:app' %}" class="nav-link">Espace Travail</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'main_app:features' %}" class="nav-link">Features</a>
+                        <a href="{% url 'main_app:features' %}" class="nav-link">Fonctionnalités</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'main_app:about' %}" class="nav-link">About</a>
+                        <a href="{% url 'main_app:about' %}" class="nav-link">À Propos</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'main_app:demo' %}" class="btn btn-primary btn-sm">
+                        <a href="{% url 'main_app:app' %}" class="btn btn-primary btn-sm">
                             <i class="fas fa-rocket me-1"></i> Try Now
                         </a>
                     </li>
@@ -83,7 +89,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="logo footer-logo mb-3 d-flex align-items-center">
                         <span class="logo-icon me-2">🧠</span>
-                        <span class="logo-text">NeuralSync<span class="logo-accent">Live</span></span>
+                        <span class="logo-text">KacheleNeuralSync<span class="logo-accent">Live</span></span>
                     </div>
                     <p class="text-muted mb-4">
                         Transform learning into an adaptive, personalized experience powered by Gemini 3 AI.
@@ -105,12 +111,14 @@
                 </div>
 
                 <div class="col-lg-2 col-md-6">
-                    <h5 class="fw-bold mb-3">Product</h5>
+                    <h5 class="fw-bold mb-3">Produit</h5>
                     <ul class="list-unstyled">
                         <li class="mb-2"><a href="{% url 'main_app:features' %}"
-                                class="text-decoration-none text-muted hover-lift d-inline-block">Features</a></li>
-                        <li class="mb-2"><a href="{% url 'main_app:demo' %}"
-                                class="text-decoration-none text-muted hover-lift d-inline-block">Demo</a></li>
+                                class="text-decoration-none text-muted hover-lift d-inline-block">Fonctionnalités</a>
+                        </li>
+                        <li class="mb-2"><a href="{% url 'main_app:app' %}"
+                                class="text-decoration-none text-muted hover-lift d-inline-block">Espace Travail</a>
+                        </li>
                         <li class="mb-2"><a href="#"
                                 class="text-decoration-none text-muted hover-lift d-inline-block">Pricing</a></li>
                         <li class="mb-2"><a href="#"
@@ -119,10 +127,10 @@
                 </div>
 
                 <div class="col-lg-2 col-md-6">
-                    <h5 class="fw-bold mb-3">Company</h5>
+                    <h5 class="fw-bold mb-3">Compagnie</h5>
                     <ul class="list-unstyled">
                         <li class="mb-2"><a href="{% url 'main_app:about' %}"
-                                class="text-decoration-none text-muted hover-lift d-inline-block">About</a></li>
+                                class="text-decoration-none text-muted hover-lift d-inline-block">À Propos</a></li>
                         <li class="mb-2"><a href="#"
                                 class="text-decoration-none text-muted hover-lift d-inline-block">Blog</a></li>
                         <li class="mb-2"><a href="#"
@@ -161,7 +169,8 @@
             <hr class="my-4 border-secondary">
 
             <div class="text-center text-muted small">
-                <p class="mb-0">&copy; 2026 NeuralSync Live. Powered by <span class="text-gradient">KERITIER NGONA
+                <p class="mb-0">&copy; 2026 KacheleNeuralSync Live. Powered by <span class="text-gradient">KERITIER
+                        NGONA
                         KACHELE</span>. Built for Gemini 3 Hackathon.</p>
             </div>
         </div>

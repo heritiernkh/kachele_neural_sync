@@ -51,10 +51,8 @@ class GeminiService:
             return config_error
 
         try:
-            # Upload de la vidéo vers Gemini (Nouveau SDK utilise files.upload)
-            # Note: Le nouveau SDK requiert souvent le chemin ou un stream
-            # Ici nous utilisons le fichier local
-            upload_result = self.client.files.upload(path=video_file.path)
+            print(f"DEBUG: SDK Uploading video from {video_file.path}...")
+            upload_result = self.client.files.upload(file=video_file.path)
             
             # Attendre que le fichier soit prêt (si nécessaire, le SDK gère souvent ça mieux)
             # Mais pour la vidéo, c'est mieux d'attendre l'état ACTIVE
@@ -67,7 +65,7 @@ class GeminiService:
                 raise ValueError("Video processing failed")
 
             prompt = f"""
-            Analyse cette vidéo éducative en profondeur. {context}
+            Analyse cette vidéo en profondeur. {context}
             
             Fournis une réponse structurée en JSON avec:
             1. "summary": Un résumé complet du contenu
@@ -162,7 +160,8 @@ class GeminiService:
             return config_error
 
         try:
-            upload_result = self.client.files.upload(path=document_file.path)
+            print(f"DEBUG: SDK Uploading document from {document_file.path}...")
+            upload_result = self.client.files.upload(file=document_file.path)
             
             # Attente active si nécessaire pour les gros PDF
             import time
@@ -207,6 +206,7 @@ class GeminiService:
             }
             
         except Exception as e:
+            print(f"!!! GEMINI SERVICE ERROR in analyze_document: {str(e)}")
             return {
                 "success": False,
                 "error": str(e)
@@ -269,7 +269,7 @@ class GeminiService:
             raise ValueError(config_error['error'])
 
         system_instruction = f"""
-        Tu es NeuralSync AI, un tuteur adaptatif expert.
+        Tu es Kachele NeuralSync AI, un tuteur adaptatif expert.
         Contexte de la session: {context}
         Niveau de l'utilisateur: {user_level}
         Principes: Socratique, Adaptatif, Enthousiaste.

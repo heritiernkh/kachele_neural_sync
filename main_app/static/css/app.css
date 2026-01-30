@@ -1,8 +1,8 @@
 /* ============================================
-   DEMO PAGE STYLES
+   APP PAGE STYLES
    ============================================ */
 
-.demo-container {
+.app-container {
     padding-top: 80px;
     min-height: 100vh;
 }
@@ -12,7 +12,7 @@
     padding: var(--space-3xl) 0;
 }
 
-.demo-header {
+.app-header {
     text-align: center;
     margin-bottom: var(--space-3xl);
 }
@@ -79,8 +79,8 @@
     box-shadow: var(--shadow-glow);
 }
 
-/* Demo Workspace */
-.demo-workspace {
+/* Workspace */
+.workspace-area {
     display: grid;
     grid-template-columns: 300px 1fr;
     gap: var(--space-xl);
@@ -88,13 +88,13 @@
 }
 
 @media (max-width: 968px) {
-    .demo-workspace {
+    .workspace-area {
         grid-template-columns: 1fr;
     }
 }
 
 /* Sidebar */
-.demo-sidebar {
+.workspace-sidebar {
     background: var(--bg-card);
     backdrop-filter: blur(20px);
     border: 1px solid var(--border-color);
@@ -123,9 +123,11 @@
 /* Upload Section */
 .upload-section {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    /* Aligné en haut */
     justify-content: center;
-    min-height: 400px;
+    min-height: 350px;
+    padding-top: var(--space-xl);
 }
 
 .upload-card {
@@ -152,7 +154,8 @@
 .chat-section {
     display: flex;
     flex-direction: column;
-    height: 600px;
+    height: 500px;
+    /* Réduit de 600px */
 }
 
 .chat-messages {

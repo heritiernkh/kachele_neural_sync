@@ -1,5 +1,5 @@
 // ============================================
-// NEURALSYNC LIVE - DEMO INTERACTIVE
+// NEURALSYNC LIVE - WORKSPACE INTERACTION
 // ============================================
 
 // Global state
@@ -14,13 +14,14 @@ let sessionStats = {
 // DOM Elements
 const modeCards = document.querySelectorAll('.mode-card');
 const modeSelectorSection = document.querySelector('.mode-selector-section');
-const demoArea = document.getElementById('demoArea');
+const workspaceArea = document.getElementById('workspaceArea');
 const backBtn = document.getElementById('backBtn');
 const fileInput = document.getElementById('fileInput');
 const browseBtn = document.getElementById('browseBtn');
 const uploadCard = document.querySelector('.upload-card');
 const uploadSection = document.getElementById('uploadSection');
 const analysisSection = document.getElementById('analysisSection');
+const chatInputSection = document.getElementById('chatInputSection');
 const chatSection = document.getElementById('chatSection');
 const loadingModal = document.getElementById('loadingModal');
 const chatInput = document.getElementById('chatInput');
@@ -129,9 +130,41 @@ function selectMode(mode) {
         .map(type => `<span class="file-type-tag">${type}</span>`)
         .join('');
 
-    // Hide mode selector, show demo area
+    // Hide mode selector, show workspace area
     modeSelectorSection.style.display = 'none';
-    demoArea.style.display = 'block';
+    workspaceArea.style.display = 'block';
+
+    // Reset visibility of work sections
+    uploadSection.className = 'upload-section h-100 d-flex align-items-start justify-content-center pt-4';
+    uploadSection.style.display = 'flex';
+
+    // Restore original upload card HTML
+    const uploadCard = uploadSection.querySelector('.upload-card');
+    if (uploadCard) {
+        uploadCard.className = 'upload-card text-center w-100 p-5 border-2 border-dashed border-secondary border-opacity-25 rounded-4 transition-base hover-glow';
+        uploadCard.style.maxWidth = '500px';
+        uploadCard.innerHTML = `
+            <div class="mb-4 text-primary display-4">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <h2 class="h3 mb-3">Upload Content</h2>
+            <p class="text-muted mb-4" id="uploadHint">
+                Drag and drop your file here, or click to browse
+            </p>
+            <input type="file" id="fileInput" accept="" style="display: none;">
+            <button class="btn btn-primary btn-lg px-4 rounded-pill" id="browseBtn">
+                <i class="fas fa-folder-open me-2"></i> Browse Files
+            </button>
+            <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap" id="fileTypes"></div>
+        `;
+        // Re-bind click event to card and input (since we replaced innerHTML)
+        uploadCard.onclick = () => document.getElementById('fileInput').click();
+    }
+
+    chatInputSection.style.display = 'none';
+    analysisSection.style.display = 'none';
+    chatSection.style.display = 'none';
+    chatMessages.innerHTML = ''; // Clear previous messages
 
     // Create session
     createSession(mode);
@@ -166,7 +199,7 @@ async function createSession(mode) {
         }
     } catch (error) {
         console.error('Error creating session:', error);
-        window.NeuralSync.showToast('Failed to create session', 'error');
+        window.KacheleNeuralSync.showToast('Failed to create session', 'error');
     }
 }
 
@@ -215,12 +248,13 @@ uploadCard.addEventListener('drop', (e) => {
 
 async function handleFileUpload(file) {
     if (!currentSessionId) {
-        window.NeuralSync.showToast('No active session', 'error');
+        window.KacheleNeuralSync.showToast('No active session', 'error');
         return;
     }
+    window.currentFileName = file.name;
 
     // Show loading modal
-    showLoadingModal(`Uploading ${file.name}...`);
+    showLoadingModal(`Analyse de ${file.name}...`);
     const progressFill = document.getElementById('progressFill');
     if (progressFill) progressFill.style.width = '0%';
 
@@ -240,10 +274,10 @@ async function handleFileUpload(file) {
                     progressFill.style.width = `${percentComplete}%`;
 
                     if (percentComplete === 100) {
-                        updateLoadingMessage('Analyzing with Gemini 3 (this may take a moment)...');
+                        updateLoadingMessage('Analyse par Gemini 2.5 Flash en cours...');
                         progressFill.classList.add('progress-bar-striped', 'progress-bar-animated');
                     } else {
-                        updateLoadingMessage(`Uploading: ${percentComplete}%`);
+                        updateLoadingMessage(`Téléchargement: ${percentComplete}%`);
                     }
                 }
             }
@@ -257,16 +291,16 @@ async function handleFileUpload(file) {
                     hideLoadingModal();
 
                     if (data.success) {
-                        window.NeuralSync.showToast('Analysis complete!', 'success');
+                        window.KacheleNeuralSync.showToast('Analysis complete!', 'success');
                         displayAnalysis(data.analysis);
                         resolve(data);
                     } else {
-                        window.NeuralSync.showToast(data.error || 'Upload failed', 'error');
+                        displayError(data.error || 'Upload failed');
                         reject(new Error(data.error));
                     }
                 } catch (e) {
                     hideLoadingModal();
-                    window.NeuralSync.showToast('Invalid server response', 'error');
+                    displayError('Invalid server response');
                     reject(e);
                 }
             } else {
@@ -277,7 +311,7 @@ async function handleFileUpload(file) {
                     errorMsg = errData.error || errorMsg;
                 } catch (e) { }
 
-                window.NeuralSync.showToast(errorMsg, 'error');
+                displayError(errorMsg);
                 reject(new Error(errorMsg));
             }
         });
@@ -285,7 +319,7 @@ async function handleFileUpload(file) {
         // Error event
         xhr.addEventListener('error', () => {
             hideLoadingModal();
-            window.NeuralSync.showToast('Network error during upload', 'error');
+            displayError('Network error during upload');
             reject(new Error('Network error'));
         });
 
@@ -295,11 +329,33 @@ async function handleFileUpload(file) {
     });
 }
 
+function displayError(message) {
+    uploadSection.style.display = 'none';
+    analysisSection.style.display = 'block';
+
+    const analysisContent = document.getElementById('analysisContent');
+    analysisContent.innerHTML = `
+        <div class="result-card animate-slide-up border-danger border-opacity-25">
+            <div class="result-header">
+                <div class="result-icon bg-danger bg-opacity-10 text-danger"><i class="fas fa-exclamation-triangle"></i></div>
+                <h3 class="result-title text-danger">Oups ! Une erreur est survenue</h3>
+            </div>
+            <p class="text-secondary">${message}</p>
+            <div class="mt-4 pt-3 border-top border-secondary border-opacity-10">
+                <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="location.reload()">
+                    <i class="fas fa-redo me-2"></i>Réessayer
+                </button>
+            </div>
+        </div>
+    `;
+    hideLoadingModal();
+}
+
 // ============================================
 // 4. DISPLAY ANALYSIS
 // ============================================
 function displayAnalysis(analysis) {
-    uploadSection.style.display = 'none';
+    // DO NOT hide uploadSection, we will compact it instead later
     analysisSection.style.display = 'block';
 
     const analysisContent = document.getElementById('analysisContent');
@@ -408,11 +464,36 @@ function displayAnalysis(analysis) {
         `;
     }
 
-    html += '</div>';
+    // Compact the upload area to save space
+    if (uploadSection) {
+        uploadSection.classList.remove('h-100', 'pt-4');
+        const uploadCard = uploadSection.querySelector('.upload-card');
+        if (uploadCard) {
+            uploadCard.classList.remove('p-5');
+            uploadCard.classList.add('p-3');
+            uploadCard.innerHTML = `
+                <div class="d-flex align-items-center justify-content-center gap-3">
+                    <div class="text-primary h5 mb-0"><i class="fas fa-file-check"></i></div>
+                    <h2 class="h6 mb-0">Fichier : <span class="text-primary">${window.currentFileName || 'Chargé'}</span></h2>
+                    <button class="btn btn-outline-primary btn-sm rounded-pill ms-auto px-3" onclick="document.getElementById('fileInput').click()">Changer</button>
+                </div>
+            `;
+        }
+    }
+
+    // Show everything
+    chatInputSection.style.display = 'block';
+    analysisSection.style.display = 'block';
+    chatSection.style.display = 'block';
 
     analysisContent.innerHTML = html;
 
-    // Add event listeners to question buttons
+    // Ensure loader is hidden
+    hideLoadingModal();
+
+    // Start interactive chat immediately
+    startInteractiveChat("Bonjour ! J'ai terminé l'analyse de ton document. De quoi souhaites-tu discuter ?");
+
     document.querySelectorAll('.answer-question-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const question = decodeURIComponent(btn.dataset.question);
@@ -426,8 +507,8 @@ function displayAnalysis(analysis) {
 // 5. INTERACTIVE CHAT
 // ============================================
 function startInteractiveChat(initialQuestion = null, correctAnswer = null) {
-    analysisSection.style.display = 'none';
-    chatSection.style.display = 'flex';
+    chatInputSection.style.display = 'block';
+    chatSection.style.display = 'block';
 
     if (initialQuestion) {
         addMessage('ai', initialQuestion);
@@ -449,7 +530,12 @@ chatInput.addEventListener('keypress', (e) => {
 
 async function sendMessage() {
     const message = chatInput.value.trim();
-    if (!message || !currentSessionId) return;
+    if (!message) return;
+
+    if (!currentSessionId) {
+        window.KacheleNeuralSync.showToast('Veuillez d\'abord sélectionner un mode et uploader un fichier.', 'warning');
+        return;
+    }
 
     // Add user message
     addMessage('user', message);
@@ -495,7 +581,7 @@ async function askQuestion(question) {
         }
     } catch (error) {
         console.error('Error asking question:', error);
-        addMessage('ai', 'Sorry, I encountered an error. Please try again.');
+        addMessage('ai', `Désolé, une erreur est survenue : ${error.message}`);
     }
 }
 
@@ -546,7 +632,7 @@ async function submitAnswer(question, userAnswer, correctAnswer) {
 requestHintBtn.addEventListener('click', async () => {
     const currentQuestion = chatInput.dataset.currentQuestion;
     if (!currentQuestion) {
-        window.NeuralSync.showToast('No active question', 'info');
+        window.KacheleNeuralSync.showToast('No active question', 'info');
         return;
     }
 
@@ -574,7 +660,7 @@ requestHintBtn.addEventListener('click', async () => {
         }
     } catch (error) {
         console.error('Error requesting hint:', error);
-        window.NeuralSync.showToast('Failed to get hint', 'error');
+        window.KacheleNeuralSync.showToast('Failed to get hint', 'error');
     }
 });
 
@@ -590,12 +676,44 @@ function addMessage(sender, text) {
             ${sender === 'ai' ? '🧠' : '👤'}
         </div>
         <div class="message-content">
-            <div class="message-bubble">${text.replace(/\n/g, '<br>')}</div>
+            <div class="message-bubble"></div>
             <div class="message-time">${timeStr}</div>
         </div>
     `;
 
     chatMessages.appendChild(messageDiv);
+    const bubble = messageDiv.querySelector('.message-bubble');
+
+    if (sender === 'ai') {
+        // Typing effect for AI
+        let i = 0;
+        bubble.classList.add('typing');
+
+        // Prepare the full HTML first but show incrementally
+        // Or better: render markdown then type it? 
+        // Rendering markdown first is safer for structure
+        const rawHtml = marked.parse(text);
+
+        // For a more natural feel, we type the text or use a CSS transition
+        // But for hackathon wow factor, let's do a smooth reveal
+        bubble.innerHTML = rawHtml;
+
+        // Trigger KaTeX rendering
+        if (window.renderMathInElement) {
+            renderMathInElement(bubble, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '\\[', right: '\\]', display: true }
+                ],
+                throwOnError: false
+            });
+        }
+    } else {
+        bubble.innerHTML = text.replace(/\n/g, '<br>');
+    }
+
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -606,11 +724,14 @@ function addMessage(sender, text) {
 // ============================================
 backBtn.addEventListener('click', () => {
     // Reset UI
-    demoArea.style.display = 'none';
+    workspaceArea.style.display = 'none';
     modeSelectorSection.style.display = 'block';
-    uploadSection.style.display = 'flex';
-    analysisSection.style.display = 'none';
-    chatSection.style.display = 'none';
+
+    // Reset Everything
+    if (currentMode) {
+        selectMode(currentMode); // Use selectMode to reset the UI state
+    }
+
     chatMessages.innerHTML = '';
 
     // Reset state
@@ -638,4 +759,4 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-console.log('%c🎯 NeuralSync Live Demo Ready!', 'color: #6366f1; font-size: 16px; font-weight: bold;');
+console.log('%c🎯 KacheleNeuralSync Live Workspace Ready!', 'color: #6366f1; font-size: 16px; font-weight: bold;');

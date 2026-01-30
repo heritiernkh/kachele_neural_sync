@@ -49,7 +49,7 @@ class UploadedContent(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     session = models.ForeignKey(LearningSession, on_delete=models.CASCADE, related_name='uploads')
     content_type = models.CharField(max_length=20, choices=CONTENT_TYPE_CHOICES)
-    file = models.FileField(upload_to='uploads/%Y/%m/%d/')
+    file = models.FileField(upload_to='uploads/%Y/%m/%d/', null=True, blank=True)
     filename = models.CharField(max_length=255)
     file_size = models.BigIntegerField()
     uploaded_at = models.DateTimeField(auto_now_add=True)

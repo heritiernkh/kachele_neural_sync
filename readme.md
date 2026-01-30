@@ -1,4 +1,4 @@
-# 🧠 NeuralSync Live - AI-Powered Adaptive Learning Platform
+# 🧠 KacheleNeuralSync Live - AI-Powered Adaptive Learning Platform
 
 [![Powered by Gemini 3](https://img.shields.io/badge/Powered%20by-Gemini%203-6366f1?style=for-the-badge)](https://ai.google.dev/)
 [![Django](https://img.shields.io/badge/Django-5.2-092e20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
@@ -11,7 +11,7 @@
 
 ## 🌟 Project Overview
 
-**NeuralSync Live** is an innovative adaptive learning platform built for the **Gemini 3 Global Hackathon**. It leverages Google's cutting-edge Gemini 3 API to create four unique learning modes that transform passive content consumption into active, personalized educational experiences.
+**KacheleNeuralSync Live** is an innovative adaptive learning platform built for the **Gemini 3 Global Hackathon**. It leverages Google's cutting-edge Gemini 3 API to create four unique learning modes that transform passive content consumption into active, personalized educational experiences.
 
 ### 🎯 The Problem We Solve
 
@@ -23,7 +23,7 @@ Traditional learning tools deliver the same content to every student, regardless
 
 ### 💡 Our Solution
 
-NeuralSync Live uses **Gemini 3's multimodal capabilities** to:
+KacheleNeuralSync Live uses **Gemini 3's multimodal capabilities** to:
 1. **Analyze** any educational content (videos, images, documents)
 2. **Adapt** to individual learning styles and comprehension levels
 3. **Guide** users with Socratic questioning instead of direct answers
@@ -99,7 +99,7 @@ NeuralSync Live uses **Gemini 3's multimodal capabilities** to:
 
 ### AI Integration
 - **Google Generative AI SDK** (google-generativeai)
-- **Gemini 2.0 Flash Exp** model for speed and multimodal capabilities
+- **Gemini 3** model for speed and multimodal capabilities
 - **Streaming responses** for real-time interactions
 - **Context preservation** across conversation turns
 - **JSON parsing** for structured data extraction
@@ -224,7 +224,7 @@ Open your browser and navigate to:
 
 ---
 
-## 🏆 Why NeuralSync Live Stands Out
+## 🏆 Why KacheleNeuralSync Live Stands Out
 
 ### 1. **Educational Impact**
 - Promotes **active learning** over passive consumption
@@ -257,7 +257,7 @@ Open your browser and navigate to:
 ### 0:00-0:30 - Hook & Problem
 - "Education fails when it treats everyone the same"
 - Show frustration of traditional learning tools
-- Introduce NeuralSync Live
+- Introduce KacheleNeuralSync Live
 
 ### 0:30-2:00 - Product Demonstration
 - **Video Mode:** Upload TED talk → interactive questions appear
@@ -273,7 +273,7 @@ Open your browser and navigate to:
 ### 2:45-3:00 - Call to Action
 - "The future of learning is adaptive"
 - Project repository and demo links
-- Invitation to try NeuralSync Live
+- Invitation to try KacheleNeuralSync Live
 
 ---
 
@@ -293,18 +293,18 @@ Open your browser and navigate to:
 ## 📝 Project Submission Details
 
 ### Description (~200 words)
-**NeuralSync Live** transforms passive learning into active, personalized experiences using Gemini 3's multimodal AI. The platform offers four learning modes:
+**KacheleNeuralSync Live** transforms passive learning into active, personalized experiences using Gemini 3's multimodal AI. The platform offers four learning modes:
 
 1. **Learn While You Watch** - Analyzes educational videos and generates context-aware questions at key moments
 2. **Visual Problem Solver** - Uses image recognition to solve problems step-by-step with Socratic guidance  
 3. **Document Intelligence** - Converts dense documents into interactive concept maps and adaptive quizzes
 4. **Creative Workshop** - Provides expert design feedback and improvement suggestions
 
-**Gemini 3 integration is central** to every feature. We leverage its vision capabilities for video/image analysis, reasoning for step-by-step problem solving, and generative abilities for creating questions, hints, and practice exercises. The platform uses **Gemini 2.0 Flash Exp** for low-latency interactions, with streaming responses for real-time chat.
+**Gemini 3 integration is central** to every feature. We leverage its vision capabilities for video/image analysis, reasoning for step-by-step problem solving, and generative abilities for creating questions, hints, and practice exercises. The platform uses **Gemini 3** for low-latency interactions, with streaming responses for real-time chat.
 
 The **adaptive difficulty system** analyzes user responses and adjusts question complexity in real-time. Rather than providing direct answers, the AI acts as a **Socratic tutor**, guiding learners to discover solutions themselves - a proven pedagogical approach now powered by state-of-the-art AI.
 
-Built with Django backend and modern frontend, NeuralSync Live demonstrates Gemini 3's potential to revolutionize education through truly personalized, adaptive learning experiences.
+Built with Django backend and modern frontend, KacheleNeuralSync Live demonstrates Gemini 3's potential to revolutionize education through truly personalized, adaptive learning experiences.
 
 ### Links
 - **Public Demo:** [Deploy to Vercel/Railway/PythonAnywhere]

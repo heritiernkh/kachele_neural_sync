@@ -1,10 +1,10 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
 
-{% block title %}NeuralSync Live - AI-Powered Adaptive Learning Platform{% endblock %}
+{% block title %}KacheleNeuralSync Live - Plateforme d'Apprentissage Adaptative par IA{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
+<!-- Section Hero -->
 <section class="hero position-relative overflow-hidden d-flex align-items-center">
     <div class="hero-bg">
         <div class="gradient-orb orb-1"></div>
@@ -14,208 +14,237 @@
 
     <div class="container position-relative z-1">
         <div class="row align-items-center g-5">
-            <!-- Hero Content -->
+            <!-- Contenu Hero -->
             <div class="col-lg-6 animate-slide-right">
-                <div class="badge badge-primary mb-4 d-inline-flex align-items-center gap-2">
+                <div
+                    class="badge bg-white bg-opacity-10 border border-white border-opacity-25 backdrop-blur mb-4 d-inline-flex align-items-center gap-2 py-2 px-3 rounded-pill shadow-sm">
                     <span class="fs-5">✨</span>
-                    <span>Powered by Gemini 3</span>
+                    <span class="fw-bold text-gradient">Propulsé par Gemini 3</span>
                 </div>
 
-                <h1 class="display-3 fw-bold mb-4">
-                    Learning That
-                    <span class="text-gradient">Adapts</span>
-                    to You
+                <h1 class="display-3 fw-bold mb-4 lh-sm">
+                    L'Apprentissage qui
+                    <span class="hero-title-gradient">S'Adapte</span>
+                    <br>à votre Esprit
                 </h1>
 
-                <p class="lead mb-5 pe-lg-5">
-                    Transform any content into an interactive, personalized learning experience.
-                    NeuralSync Live uses cutting-edge AI to guide, challenge, and inspire your educational journey.
+                <p class="lead mb-5 pe-lg-5 text-secondary">
+                    Transformez n'importe quel contenu en une expérience d'apprentissage interactive et personnalisée.
+                    KacheleNeuralSync Live utilise l'IA de pointe pour vous guider, vous défier et inspirer votre parcours
+                    éducatif.
                 </p>
 
                 <div class="d-flex flex-wrap gap-3 mb-5">
-                    <a href="{% url 'main_app:demo' %}" class="btn btn-primary btn-lg hover-lift">
-                        <span>Start Learning</span>
+                    <a href="{% url 'main_app:app' %}"
+                        class="btn btn-primary btn-lg hover-lift py-3 px-4 shadow-lg rounded-pill">
+                        <span class="fw-semibold">Commencer l'Aventure</span>
                         <i class="fas fa-arrow-right ms-2"></i>
                     </a>
-                    <a href="#how-it-works" class="btn btn-secondary btn-lg hover-lift">
-                        <i class="fas fa-play ms-2"></i>
-                        <span>Watch Demo</span>
+                    <a href="#how-it-works" class="btn btn-outline-light btn-lg hover-lift py-3 px-4 rounded-pill">
+                        <i class="fas fa-play me-2"></i>
+                        <span>Voir comment ça marche</span>
                     </a>
                 </div>
 
                 <div class="row g-4 pt-4 border-top border-secondary border-opacity-25">
                     <div class="col-auto">
                         <div class="h2 fw-bold text-gradient mb-0">4</div>
-                        <div class="small text-muted text-uppercase fw-semibold">Learning Modes</div>
+                        <div class="small text-tertiary text-uppercase fw-semibold">Modes d'Apprentissage</div>
                     </div>
                     <div class="col-auto border-start border-secondary border-opacity-25"></div>
                     <div class="col-auto">
                         <div class="h2 fw-bold text-gradient mb-0">∞</div>
-                        <div class="small text-muted text-uppercase fw-semibold">Subjects</div>
+                        <div class="small text-tertiary text-uppercase fw-semibold">Sujets</div>
                     </div>
                     <div class="col-auto border-start border-secondary border-opacity-25"></div>
                     <div class="col-auto">
                         <div class="h2 fw-bold text-gradient mb-0">100%</div>
-                        <div class="small text-muted text-uppercase fw-semibold">Adaptive</div>
+                        <div class="small text-tertiary text-uppercase fw-semibold">Adaptatif</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Hero Visual -->
+            <!-- Visuel Hero -->
             <div class="col-lg-6 d-none d-lg-block animate-slide-up">
-                <div class="position-relative mx-auto" style="max-width: 400px;">
-                    <div class="card glassmorphism border-0 shadow-lg p-3">
-                        <div class="card-body bg-dark rounded-4 p-4 position-relative overflow-hidden"
-                            style="min-height: 600px;">
-                            <!-- Chat simulation -->
+                <div class="position-relative mx-auto" style="max-width: 450px;">
+                    <div class="card glassmorphism border-0 shadow-lg p-1 rounded-5">
+                        <div class="card-body bg-dark rounded-5 p-4 position-relative overflow-hidden"
+                            style="min-height: 550px; background: #0a0a12 !important;">
+                            <!-- Simulation de chat -->
                             <div class="d-flex flex-column gap-3">
-                                <div class="p-3 rounded-4 ms-auto text-white bg-gradient-primary w-75 shadow-sm">
-                                    <small class="d-block opacity-75 mb-1">You</small>
-                                    What's the derivative of x²?
+                                <div class="p-3 rounded-4 ms-auto text-white bg-gradient-primary w-75 shadow-sm animate-in"
+                                    style="animation-delay: 0.5s">
+                                    <small class="d-block opacity-75 mb-1">Vous</small>
+                                    C'est quoi la dérivée de x² ?
                                 </div>
-                                <div
-                                    class="p-3 rounded-4 me-auto bg-light bg-opacity-10 border border-light border-opacity-10 w-85 shadow-sm">
-                                    <small class="d-block text-primary mb-1">Gemini 3</small>
-                                    Let's think step by step! What happens to x² when you increase x slightly? 📈
+                                <div class="p-3 rounded-4 me-auto bg-white bg-opacity-5 border border-white border-opacity-5 w-85 shadow-sm animate-in"
+                                    style="animation-delay: 1.5s">
+                                    <small class="d-block text-info mb-1 fw-bold">Gemini 3</small>
+                                    <span class="text-secondary">Réfléchissons ensemble ! Que se passe-t-il pour x² si
+                                        vous augmentez légèrement x ? 📈</span>
                                     <div class="mt-3">
-                                        <div class="progress" style="height: 4px;">
-                                            <div class="progress-bar w-25" role="progressbar"></div>
+                                        <div class="progress bg-secondary bg-opacity-20" style="height: 4px;">
+                                            <div class="progress-bar w-25 bg-info" role="progressbar"></div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="p-3 rounded-4 ms-auto text-white bg-gradient-primary w-75 shadow-sm">
-                                    <small class="d-block opacity-75 mb-1">You</small>
-                                    It becomes 2x?
+                                <div class="p-3 rounded-4 ms-auto text-white bg-gradient-primary w-75 shadow-sm animate-in"
+                                    style="animation-delay: 2.5s">
+                                    <small class="d-block opacity-75 mb-1">Vous</small>
+                                    Ça devient 2x ?
                                 </div>
-                                <div
-                                    class="p-3 rounded-4 me-auto bg-light bg-opacity-10 border border-light border-opacity-10 w-85 shadow-sm">
-                                    <small class="d-block text-primary mb-1">Gemini 3</small>
-                                    Exact! 🎉 Using the power rule: nx^(n-1).
-                                    <br>Now, what about x³?
+                                <div class="p-3 rounded-4 me-auto bg-white bg-opacity-5 border border-white border-opacity-5 w-85 shadow-sm animate-in"
+                                    style="animation-delay: 3.5s">
+                                    <small class="d-block text-success mb-1 fw-bold">Gemini 3</small>
+                                    <span class="text-secondary">Exactement ! 🎉 C'est la règle de puissance : nx^(n-1).
+                                        <br>Et pour x³ alors ?</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Levitating Elements -->
+                    <!-- Éléments en lévitation -->
                     <div class="position-absolute top-0 end-0 translate-middle-y mt-5 me-n5 p-3 glassmorphism rounded-4 shadow-lg animate-pulse-glow"
                         style="z-index: 2;">
                         <i class="fas fa-bolt text-warning fs-3"></i>
+                    </div>
+                    <div class="position-absolute top-50 start-0 translate-middle-y ms-n4 p-3 glassmorphism rounded-circle shadow-lg animate-float"
+                        style="z-index: 2; animation-delay: -2s; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-lightbulb text-info fs-3"></i>
                     </div>
                     <div class="position-absolute bottom-0 start-0 translate-middle-y mb-5 ms-n4 p-3 glassmorphism rounded-4 shadow-lg animate-pulse-glow"
                         style="z-index: 2; animation-delay: 1s;">
                         <i class="fas fa-brain text-info fs-3"></i>
                     </div>
+                    <div class="position-absolute bottom-0 end-0 translate-middle-y mb-5 me-n4 p-3 glassmorphism rounded-4 shadow-lg animate-float"
+                        style="z-index: 2; animation-delay: -1.5s;">
+                        <i class="fas fa-code text-success fs-3"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Features Grid Section -->
+<!-- Section Grille de Fonctionnalités -->
 <section class="section py-5" id="features">
     <div class="container py-5">
-        <div class="text-center mb-5 mx-auto" style="max-width: 700px;">
-            <h2 class="display-5 fw-bold mb-3">Four Powerful Learning Modes</h2>
-            <p class="lead">Each mode leverages Gemini 3's advanced multimodal capabilities to create unique learning
-                experiences</p>
+        <div class="text-center mb-5 mx-auto" style="max-width: 800px;">
+            <h2 class="display-5 fw-bold mb-3">Quatres Modes d'Apprentissage Puissants</h2>
+            <p class="lead text-secondary">Chaque mode exploite les capacités multimodales avancées de Gemini 3 pour
+                créer des expériences uniques.</p>
         </div>
 
         <div class="row g-4">
-            <!-- Feature 1: Video Learning -->
+            <!-- Fonctionnalité 1: Vidéo -->
             <div class="col-md-6 col-lg-3">
-                <div class="card h-100 hover-lift feature-card text-center p-4">
-                    <div class="card-body">
-                        <div class="feature-icon bg-gradient-primary rounded-4 text-white d-inline-flex align-items-center justify-content-center mb-4 shadow-lg"
-                            style="width: 64px; height: 64px; font-size: 1.75rem;">
+                <div
+                    class="card h-100 feature-card text-center p-4 border-0 rounded-4 overflow-hidden position-relative">
+                    <div
+                        class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-primary opacity-0 hover-opacity-10 transition-base">
+                    </div>
+                    <div class="card-body position-relative z-1">
+                        <div class="feature-icon bg-gradient-primary rounded-circle text-white d-inline-flex align-items-center justify-content-center mb-4 shadow-lg animate-float"
+                            style="width: 80px; height: 80px; font-size: 2rem;">
                             <i class="fas fa-video"></i>
                         </div>
-                        <h4 class="card-title h5 mb-3">Learn While You Watch</h4>
-                        <p class="card-text mb-4">
-                            Upload educational videos and let Gemini 3 analyze them real-time. Get interactive questions
-                            at key moments.
+                        <h4 class="card-title h5 fw-bold mb-3">Regardez & Apprenez</h4>
+                        <p class="card-text text-tertiary mb-4">
+                            Importez des vidéos éducatives. Gemini 3 les analyse en temps réel et pose des questions aux
+                            moments clés.
                         </p>
                         <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
-                            <span
-                                class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">Real-time</span>
-                            <span
-                                class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">Interactive</span>
+                            <span class="badge badge-primary">Temps Réel</span>
+                            <span class="badge badge-primary">Interactif</span>
                         </div>
-                        <a href="{% url 'main_app:demo' %}?mode=video"
-                            class="btn btn-sm btn-outline-primary w-100 stretched-link">Try Video Mode</a>
+                        <a href="{% url 'main_app:app' %}?mode=video"
+                            class="btn btn-sm btn-outline-primary w-100 stretched-link">Essayer Vidéo</a>
                     </div>
                 </div>
             </div>
 
-            <!-- Feature 2: Problem Solver -->
+            <!-- Fonctionnalité 2: Problèmes -->
             <div class="col-md-6 col-lg-3">
-                <div class="card h-100 hover-lift feature-card text-center p-4">
-                    <div class="card-body">
-                        <div class="feature-icon bg-gradient-secondary rounded-4 text-white d-inline-flex align-items-center justify-content-center mb-4 shadow-lg"
-                            style="width: 64px; height: 64px; font-size: 1.75rem; background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);">
+                <div class="card h-100 feature-card text-center p-4 border-0 rounded-4 overflow-hidden position-relative"
+                    style="transition-delay: 0.1s">
+                    <div
+                        class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-secondary opacity-0 hover-opacity-10 transition-base">
+                    </div>
+                    <div class="card-body position-relative z-1">
+                        <div class="feature-icon bg-gradient-secondary rounded-circle text-white d-inline-flex align-items-center justify-content-center mb-4 shadow-lg animate-float"
+                            style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); animation-delay: -1s;">
                             <i class="fas fa-calculator"></i>
                         </div>
-                        <h4 class="card-title h5 mb-3">Visual Problem Solver</h4>
-                        <p class="card-text mb-4">
-                            Snap a photo of any problem. Gemini 3 guides you step-by-step using the Socratic method.
+                        <h4 class="card-title h5 fw-bold mb-3">Résolveur Visuel</h4>
+                        <p class="card-text text-tertiary mb-4">
+                            Prenez en photo n'importe quel problème. Gemini 3 vous guide pas à pas avec la méthode
+                            socratique.
                         </p>
                         <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
                             <span
-                                class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">Socratic</span>
+                                class="badge border border-info border-opacity-25 text-info bg-info bg-opacity-10">Socratique</span>
                             <span
-                                class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">Math
+                                class="badge border border-info border-opacity-25 text-info bg-info bg-opacity-10">Maths
                                 & Code</span>
                         </div>
-                        <a href="{% url 'main_app:demo' %}?mode=problem"
-                            class="btn btn-sm btn-outline-info w-100 stretched-link">Try Problem Solver</a>
+                        <a href="{% url 'main_app:app' %}?mode=problem"
+                            class="btn btn-sm btn-outline-info w-100 stretched-link">Essayer Problèmes</a>
                     </div>
                 </div>
             </div>
 
-            <!-- Feature 3: Document Intelligence -->
+            <!-- Fonctionnalité 3: Documents -->
             <div class="col-md-6 col-lg-3">
-                <div class="card h-100 hover-lift feature-card text-center p-4">
-                    <div class="card-body">
-                        <div class="feature-icon rounded-4 text-white d-inline-flex align-items-center justify-content-center mb-4 shadow-lg"
-                            style="width: 64px; height: 64px; font-size: 1.75rem; background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);">
+                <div class="card h-100 feature-card text-center p-4 border-0 rounded-4 overflow-hidden position-relative"
+                    style="transition-delay: 0.2s">
+                    <div
+                        class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-success opacity-0 hover-opacity-10 transition-base">
+                    </div>
+                    <div class="card-body position-relative z-1">
+                        <div class="feature-icon rounded-circle text-white d-inline-flex align-items-center justify-content-center mb-4 shadow-lg animate-float"
+                            style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); animation-delay: -2s;">
                             <i class="fas fa-file-alt"></i>
                         </div>
-                        <h4 class="card-title h5 mb-3">Document Intelligence</h4>
-                        <p class="card-text mb-4">
-                            Transform dense documents into interactive concept maps and adaptive quizzes.
+                        <h4 class="card-title h5 fw-bold mb-3">Intelligence Doc</h4>
+                        <p class="card-text text-tertiary mb-4">
+                            Transformez des documents denses en cartes conceptuelles interactives et quiz adaptatifs.
                         </p>
                         <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
                             <span
-                                class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Concept
+                                class="badge border border-success border-opacity-25 text-success bg-success bg-opacity-10">Concept
                                 Maps</span>
                             <span
-                                class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Summaries</span>
+                                class="badge border border-success border-opacity-25 text-success bg-success bg-opacity-10">Résumés</span>
                         </div>
-                        <a href="{% url 'main_app:demo' %}?mode=document"
-                            class="btn btn-sm btn-outline-success w-100 stretched-link">Try Documents</a>
+                        <a href="{% url 'main_app:app' %}?mode=document"
+                            class="btn btn-sm btn-outline-success w-100 stretched-link">Essayer Documents</a>
                     </div>
                 </div>
             </div>
 
-            <!-- Feature 4: Creative Workshop -->
+            <!-- Fonctionnalité 4: Creative -->
             <div class="col-md-6 col-lg-3">
-                <div class="card h-100 hover-lift feature-card text-center p-4">
-                    <div class="card-body">
-                        <div class="feature-icon rounded-4 text-white d-inline-flex align-items-center justify-content-center mb-4 shadow-lg"
-                            style="width: 64px; height: 64px; font-size: 1.75rem; background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);">
+                <div class="card h-100 feature-card text-center p-4 border-0 rounded-4 overflow-hidden position-relative"
+                    style="transition-delay: 0.3s">
+                    <div
+                        class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-warning opacity-0 hover-opacity-10 transition-base">
+                    </div>
+                    <div class="card-body position-relative z-1">
+                        <div class="feature-icon rounded-circle text-white d-inline-flex align-items-center justify-content-center mb-4 shadow-lg animate-float"
+                            style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, #f97316 0%, #ec4899 100%); animation-delay: -3s;">
                             <i class="fas fa-palette"></i>
                         </div>
-                        <h4 class="card-title h5 mb-3">Creative Workshop</h4>
-                        <p class="card-text mb-4">
-                            Upload designs or sketches. Get expert feedback and variations powered by AI creativity.
+                        <h4 class="card-title h5 fw-bold mb-3">Atelier Créatif</h4>
+                        <p class="card-text text-tertiary mb-4">
+                            Analysez vos designs ou esquisses. Obtenez des retours d'experts et des variations IA.
                         </p>
                         <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
                             <span
-                                class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Feedback</span>
+                                class="badge border border-warning border-opacity-25 text-warning bg-warning bg-opacity-10">Feedback</span>
                             <span
-                                class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Design</span>
+                                class="badge border border-warning border-opacity-25 text-warning bg-warning bg-opacity-10">Design</span>
                         </div>
-                        <a href="{% url 'main_app:demo' %}?mode=creative"
-                            class="btn btn-sm btn-outline-warning w-100 stretched-link">Try Creative</a>
+                        <a href="{% url 'main_app:app' %}?mode=creative"
+                            class="btn btn-sm btn-outline-warning w-100 stretched-link">Essayer Création</a>
                     </div>
                 </div>
             </div>
@@ -223,12 +252,12 @@
     </div>
 </section>
 
-<!-- How It Works -->
-<section class="section py-5 bg-dark bg-opacity-50" id="how-it-works">
+<!-- Section Comment ça marche -->
+<section class="section py-5 bg-dark bg-opacity-30" id="how-it-works">
     <div class="container py-5">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold mb-3">How It Works</h2>
-            <p class="lead">Three simple steps to personalized learning</p>
+            <h2 class="display-5 fw-bold mb-3">Comment ça marche</h2>
+            <p class="lead text-secondary">Trois étapes simples vers un apprentissage personnalisé</p>
         </div>
 
         <div class="row g-4 align-items-center justify-content-center">
@@ -238,13 +267,13 @@
                         <div class="d-inline-flex align-items-center justify-content-center text-white rounded-circle mb-4 shadow-lg animate-pulse-glow"
                             style="width: 80px; height: 80px; background: var(--gradient-primary); font-size: 2rem; font-weight: bold;">
                             1</div>
-                        <h3 class="h4 mb-3">Upload Content</h3>
-                        <p class="text-muted">Videos, images, documents, or sketches — any format works.</p>
+                        <h3 class="h4 mb-3">Importez du Contenu</h3>
+                        <p class="text-tertiary">Vidéos, images, documents ou croquis — tout fonctionne.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-auto d-none d-md-block text-primary fs-1">
+            <div class="col-md-auto d-none d-md-block text-primary fs-1 opacity-25">
                 <i class="fas fa-chevron-right"></i>
             </div>
 
@@ -254,14 +283,14 @@
                         <div class="d-inline-flex align-items-center justify-content-center text-white rounded-circle mb-4 shadow-lg animate-pulse-glow"
                             style="width: 80px; height: 80px; background: var(--gradient-primary); font-size: 2rem; font-weight: bold; animation-delay: 0.5s;">
                             2</div>
-                        <h3 class="h4 mb-3">AI Analysis</h3>
-                        <p class="text-muted">Gemini 3 understands context and creates personalized guidance instanly.
-                        </p>
+                        <h3 class="h4 mb-3">Analyse par l'IA</h3>
+                        <p class="text-tertiary">Gemini 3 comprend le contexte et crée un guide personnalisé
+                            instantanément.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-auto d-none d-md-block text-primary fs-1">
+            <div class="col-md-auto d-none d-md-block text-primary fs-1 opacity-25">
                 <i class="fas fa-chevron-right"></i>
             </div>
 
@@ -271,8 +300,9 @@
                         <div class="d-inline-flex align-items-center justify-content-center text-white rounded-circle mb-4 shadow-lg animate-pulse-glow"
                             style="width: 80px; height: 80px; background: var(--gradient-primary); font-size: 2rem; font-weight: bold; animation-delay: 1s;">
                             3</div>
-                        <h3 class="h4 mb-3">Learn Interactively</h3>
-                        <p class="text-muted">Engage with adaptive questions, hints, and real-time feedback.</p>
+                        <h3 class="h4 mb-3">Apprentissage Interactif</h3>
+                        <p class="text-tertiary">Participez avec des questions adaptatives et des retours en temps réel.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -280,20 +310,21 @@
     </div>
 </section>
 
-<!-- CTA Section -->
+<!-- Section CTA -->
 <section class="section py-5">
     <div class="container py-5">
         <div
-            class="p-5 rounded-5 glassmorphism text-center position-relative overflow-hidden border border-primary border-opacity-25">
+            class="p-5 rounded-5 glassmorphism text-center position-relative overflow-hidden border border-primary border-opacity-25 shadow-2xl">
             <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-primary opacity-10" style="z-index: 0;">
             </div>
 
-            <div class="position-relative z-1">
-                <h2 class="display-5 fw-bold mb-4">Ready to Transform Your Learning?</h2>
-                <p class="lead mb-5 text-muted">Join the future of adaptive education powered by Gemini 3</p>
-                <a href="{% url 'main_app:demo' %}"
+            <div class="position-relative z-1 py-4">
+                <h2 class="display-5 fw-bold mb-4">Prêt à Transformer votre Apprentissage ?</h2>
+                <p class="lead mb-5 text-secondary">Rejoignez le futur de l'éducation adaptative propulsé par Gemini 3.
+                </p>
+                <a href="{% url 'main_app:app' %}"
                     class="btn btn-primary btn-lg shadow-lg hover-lift px-5 py-3 rounded-pill">
-                    <span>Start Free Trial</span>
+                    <span>Commencer Gratuitement</span>
                     <i class="fas fa-rocket ms-2"></i>
                 </a>
             </div>
@@ -305,34 +336,89 @@
     .gradient-orb {
         position: absolute;
         border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.3;
+        filter: blur(120px);
+        opacity: 0.35;
         pointer-events: none;
+        animation: float-orb 15s infinite ease-in-out;
+    }
+
+    @keyframes float-orb {
+
+        0%,
+        100% {
+            transform: translate(0, 0) scale(1);
+        }
+
+        33% {
+            transform: translate(50px, -40px) scale(1.1);
+        }
+
+        66% {
+            transform: translate(-30px, 20px) scale(0.9);
+        }
     }
 
     .orb-1 {
-        width: 500px;
-        height: 500px;
-        background: var(--primary-600);
-        top: -200px;
-        right: 0;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, var(--primary-600), transparent 70%);
+        top: -250px;
+        left: 45%;
+        animation-delay: 0s;
     }
 
     .orb-2 {
-        width: 400px;
-        height: 400px;
-        background: var(--accent-purple);
-        bottom: -100px;
-        left: 0;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, var(--accent-purple), transparent 70%);
+        bottom: -150px;
+        left: -100px;
+        animation-delay: -3s;
     }
 
     .orb-3 {
-        width: 300px;
-        height: 300px;
-        background: var(--accent-cyan);
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        width: 450px;
+        height: 450px;
+        background: radial-gradient(circle, var(--accent-cyan), transparent 70%);
+        top: 35%;
+        right: -120px;
+        animation-delay: -7s;
+    }
+
+    .hero-title-gradient {
+        background: linear-gradient(135deg, #ffffff 0%, #6366f1 50%, #a855f7 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+    }
+
+    .glassmorphism {
+        background: rgba(255, 255, 255, 0.03) !important;
+        backdrop-filter: blur(16px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .feature-card:hover {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border-color: rgba(99, 102, 241, 0.4) !important;
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(99, 102, 241, 0.1);
+    }
+
+    .text-gradient {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 </style>
 {% endblock %}
