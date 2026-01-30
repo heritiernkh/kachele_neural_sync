@@ -19,6 +19,8 @@ venv/
 ENV/
 env/
 .env
+main_app/__pycache__/
+kachele_neural_sync/__pycache__/
 
 # IDE
 .vscode/
