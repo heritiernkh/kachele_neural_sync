@@ -249,27 +249,36 @@ def upload_content(request):
             
             temp_file_obj = TempFileWrapper(temp_file_path)
             
+            # Récupérer le mode rapide si spécifié (défaut: False pour qualité maximale)
+            speed_mode = request.POST.get('speed_mode', 'false').lower() == 'true'
+            if speed_mode:
+                print(f"DEBUG: ⚡ SPEED MODE activated for {file.name}")
+            
             analysis_result = None
             
             if session.mode == 'video' and content_type == 'video':
                 analysis_result = gemini_service.analyze_video(
                     temp_file_obj,
-                    context=context
+                    context=context,
+                    speed_mode=speed_mode
                 )
             elif session.mode == 'problem' and content_type == 'image':
                 analysis_result = gemini_service.analyze_image_problem(
                     temp_file_path, # On passe le path directement car PIL.Image.open l'accepte
-                    subject_hint=context
+                    subject_hint=context,
+                    speed_mode=speed_mode
                 )
             elif session.mode == 'document' and content_type == 'document':
                 analysis_result = gemini_service.analyze_document(
                     temp_file_obj,
-                    focus_areas=context
+                    focus_areas=context,
+                    speed_mode=speed_mode
                 )
             elif session.mode == 'creative' and content_type == 'image':
                 analysis_result = gemini_service.creative_workshop(
                     temp_file_path, 
-                    creative_goal=context
+                    creative_goal=context,
+                    speed_mode=speed_mode
                 )
             
             if analysis_result and analysis_result.get('success'):
@@ -355,6 +364,147 @@ def upload_content(request):
             'success': False,
             'error': f"Erreur {type(e).__name__}: {str(e)}"
         }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def generate_first_question(request):
+    """
+    Génère automatiquement une première question socratique après l'analyse
+    
+    POST body:
+    {
+        "session_id": "...",
+        "mode": "video|problem|document|creative"
+    }
+    """
+    try:
+        data = json.loads(request.body)
+        session_id = data.get('session_id')
+        mode = data.get('mode')
+        
+        session = LearningSession.objects.get(id=session_id)
+        latest_upload = session.uploads.filter(analysis_completed=True).last()
+        
+        if not latest_upload:
+            return JsonResponse({
+                'success': False,
+                'error': 'No completed analysis found'
+            }, status=404)
+        
+        analysis = json.loads(latest_upload.analysis_summary)
+        
+        # Créer un prompt spécifique selon le mode pour générer la première question
+        if mode == 'video':
+            prompt = f"""
+            Tu as analysé une vidéo éducative. Voici le résumé:
+            {analysis.get('summary', '')}
+            
+            Concepts clés: {', '.join(analysis.get('key_concepts', []))}
+            
+            En tant que tuteur socratique, génère UNE question d'ouverture engageante qui:
+            1. Vérifie si l'étudiant a compris le message principal
+            2. Ne révèle pas la réponse
+            3. Est formulée de manière encourageante et stimulante
+            4. Pousse à la réflexion critique
+            
+            Réponds UNIQUEMENT avec la question, sans introduction ni conclusion.
+            """
+        elif mode == 'problem':
+            prompt = f"""
+            Tu as analysé un problème visuel de type: {analysis.get('problem_type', 'inconnu')}
+            
+            Concepts requis: {', '.join(analysis.get('concepts_needed', []))}
+            
+            En tant que tuteur socratique, génère UNE question d'ouverture qui:
+            1. Demande à l'étudiant d'identifier le type de problème
+            2. L'invite à réfléchir aux concepts nécessaires
+            3. Ne donne aucun indice direct sur la solution
+            
+            Réponds UNIQUEMENT avec la question, sans autre texte.
+            """
+        elif mode == 'document':
+            prompt = f"""
+            Tu as analysé un document de type: {analysis.get('document_type', 'académique')}
+            
+            Résumé: {analysis.get('summary', '')[:200]}...
+            Sujets principaux: {', '.join(analysis.get('main_topics', [])[:3])}
+            
+            En tant que tuteur socratique, génère UNE question d'ouverture qui:
+            1. Vérifie la compréhension globale du document
+            2. Encourage à faire des liens entre les concepts
+            3. Est ouverte et stimulante
+            
+            Réponds UNIQUEMENT avec la question.
+            """
+        else:  # creative
+            prompt = f"""
+            Tu as analysé un travail créatif.
+            
+            Points forts identifiés: {', '.join([imp.get('aspect', '') for imp in analysis.get('strengths', [])[:2]])}
+            
+            En tant que mentor créatif, génère UNE question d'ouverture qui:
+            1. Demande à l'artiste d'expliquer son intention créative
+            2. L'invite à réfléchir sur ses choix
+            3. Est positive et encourageante
+            
+            Réponds UNIQUEMENT avec la question.
+            """
+        
+        # Initialiser la session de chat si nécessaire
+        if not hasattr(gemini_service, '_active_chats'):
+            gemini_service._active_chats = {}
+        
+        if session_id not in gemini_service._active_chats:
+            full_context = f"""
+            Session Mode: {session.get_mode_display()}
+            Content Analysis: {json.dumps(analysis, indent=2)}
+            """
+            gemini_service._active_chats[session_id] = gemini_service.start_interactive_session(
+                context=full_context,
+                user_level='intermediate'
+            )
+        
+        # Générer la question
+        question = gemini_service.send_message(
+            prompt,
+            chat_session=gemini_service._active_chats[session_id]
+        )
+        
+        # Nettoyer la question (enlever les éventuels guillemets ou formatage)
+        question = question.strip().strip('"').strip("'")
+        
+        return JsonResponse({
+            'success': True,
+            'question': question
+        })
+        
+    except LearningSession.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Session not found'
+        }, status=404)
+    except Exception as e:
+        error_msg, status_code = clean_gemini_error(str(e))
+        
+        # FAILOVER: Questions prédéfinies selon le mode
+        if status_code in [429, 503]:
+            fallback_questions = {
+                'video': "Après avoir regardé cette vidéo, quel est selon toi le concept le plus important qui y est présenté ? Pourquoi ?",
+                'problem': "Avant de te donner des indices, quelle est ta première approche pour résoudre ce problème ? Quels concepts penses-tu devoir utiliser ?",
+                'document': "Maintenant que tu as parcouru ce document, quels sont les 2-3 idées principales qui en ressortent selon toi ?",
+                'creative': "Peux-tu m'expliquer l'intention derrière ton travail ? Qu'as-tu cherché à exprimer ou à accomplir ?"
+            }
+            return JsonResponse({
+                'success': True,
+                'question': fallback_questions.get(data.get('mode'), "Que penses-tu de ce contenu ?"),
+                'is_fallback': True
+            })
+        
+        return JsonResponse({
+            'success': False,
+            'error': error_msg
+        }, status=status_code)
 
 
 @csrf_exempt

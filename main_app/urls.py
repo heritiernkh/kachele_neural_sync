@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/session/create/', views.create_session, name='create_session'),
     path('api/session/<uuid:session_id>/stats/', views.get_session_stats, name='session_stats'),
     path('api/upload/', views.upload_content, name='upload_content'),
+    path('api/first-question/', views.generate_first_question, name='generate_first_question'),
     path('api/ask/', views.ask_question, name='ask_question'),
     path('api/answer/', views.submit_answer, name='submit_answer'),
     path('api/hint/', views.request_hint, name='request_hint'),

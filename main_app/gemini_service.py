@@ -44,8 +44,15 @@ class GeminiService:
             }
         return None
 
-    def analyze_video(self, video_file, context=""):
-        """Analyse une vidéo et extrait les concepts clés"""
+    def analyze_video(self, video_file, context="", speed_mode=False):
+        """
+        Analyse une vidéo et extrait les concepts clés
+        
+        Args:
+            video_file: Fichier vidéo à analyser
+            context: Contexte additionnel
+            speed_mode: Si True, analyse plus rapide (30-50% gain) avec profondeur légèrement réduite
+        """
         config_error = self._check_config()
         if config_error:
             return config_error
@@ -76,16 +83,26 @@ class GeminiService:
                Format: [{{"timestamp": "MM:SS", "question": "...", "hint": "...", "answer": "..."}}]
             6. "prerequisites": Connaissances préalables recommandées
             
+            IMPORTANT: Utilise TOUJOURS le format LaTeX pour les équations mathématiques ($...$ pour en ligne, $$...$$ pour bloc).
             Réponds uniquement par le JSON.
             """
             
-            # Utilisation de config de génération pour forcer le JSON et la haute résolution
-            generate_config = types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.85,
-                thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
-                media_resolution="MEDIA_RESOLUTION_HIGH"
-            )
+            # Configuration adaptée selon le mode (rapide ou qualité)
+            if speed_mode:
+                # Mode rapide : ~40% plus rapide, qualité légèrement réduite
+                generate_config = types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.7,
+                    media_resolution="MEDIA_RESOLUTION_MEDIUM"
+                )
+            else:
+                # Mode qualité : Analyse profonde avec HIGH thinking
+                generate_config = types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.85,
+                    thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
+                    media_resolution="MEDIA_RESOLUTION_HIGH"
+                )
 
             response = self.client.models.generate_content(
                 model=self.model_name,
@@ -108,8 +125,13 @@ class GeminiService:
                 "error": str(e)
             }
     
-    def analyze_image_problem(self, image_file, subject_hint=""):
-        """Analyse une image d'un problème"""
+    def analyze_image_problem(self, image_file, subject_hint="", speed_mode=False):
+        """
+        Analyse une image d'un problème
+        
+        Args:
+            speed_mode: Si True, analyse plus rapide avec thinking_level désactivé
+        """
         config_error = self._check_config()
         if config_error:
             return config_error
@@ -129,16 +151,24 @@ class GeminiService:
             5. "final_answer": La solution complète (sera cachée initialement)
             6. "similar_problems": 3 problèmes similaires pour pratiquer
             
-            IMPORTANT: Guide l'étudiant, ne donne pas directement la réponse!
+            IMPORTANT: Guide l'étudiant, ne donne pas directement la réponse! 
+            Utilise TOUJOURS le format LaTeX pour les équations mathématiques ($...$ pour en ligne, $$...$$ pour bloc).
             Réponds uniquement par le JSON.
             """
             
-            generate_config = types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.85,
-                thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
-                media_resolution="MEDIA_RESOLUTION_HIGH"
-            )
+            if speed_mode:
+                generate_config = types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.7,
+                    media_resolution="MEDIA_RESOLUTION_MEDIUM"
+                )
+            else:
+                generate_config = types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.85,
+                    thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
+                    media_resolution="MEDIA_RESOLUTION_HIGH"
+                )
 
             response = self.client.models.generate_content(
                 model=self.model_name,
@@ -159,8 +189,13 @@ class GeminiService:
                 "error": str(e)
             }
     
-    def analyze_document(self, document_file, focus_areas=""):
-        """Analyse un document et crée une carte conceptuelle"""
+    def analyze_document(self, document_file, focus_areas="", speed_mode=False):
+        """
+        Analyse un document de tout format et crée une carte conceptuelle interactive.
+        
+        Formats supportés: PDF, DOCX, TXT, MD, HTML, RTF, EPUB, et autres formats textuels.
+        Le modèle Gemini 3 peut traiter nativement la mise en page, les images intégrées et le texte structuré.
+        """
         config_error = self._check_config()
         if config_error:
             return config_error
@@ -169,37 +204,55 @@ class GeminiService:
             print(f"DEBUG: SDK Uploading document from {document_file.path}...")
             upload_result = self.client.files.upload(file=document_file.path)
             
-            # Attente active si nécessaire pour les gros PDF
+            # Attente active si nécessaire pour les documents volumineux (PDF, DOCX, etc.)
             import time
             while upload_result.state.name == "PROCESSING":
                 time.sleep(1)
                 upload_result = self.client.files.get(name=upload_result.name)
             
+            if upload_result.state.name == "FAILED":
+                raise ValueError(f"Le traitement du document a échoué. Vérifiez le format du fichier.")
+            
             prompt = f"""
-            Analyse ce document académique/technique en profondeur.
-            {f"Focus sur: {focus_areas}" if focus_areas else ""}
+            Analyse ce document (PDF, Word, texte, Markdown, etc.) de manière approfondie et multimodale.
+            {f"Focus spécifique sur: {focus_areas}" if focus_areas else ""}
             
-            Fournis une réponse JSON avec:
-            1. "summary": Résumé exécutif du document
-            2. "main_topics": Liste des sujets principaux
-            3. "concept_map": 
-               - "nodes": [{{"id": "unique_id", "label": "Concept", "level": 1-3, "description": "..."}}]
-               - "edges": [{{"from": "id1", "to": "id2", "relationship": "..."}}]
-            4. "key_definitions": Dictionnaire des termes importants
-            5. "quiz_questions": 10 questions adaptatives de différents niveaux
+            Fournis une réponse JSON structurée avec:
+            1. "document_type": Type de document détecté (académique, technique, cours, article...)
+            2. "summary": Résumé exécutif complet du contenu
+            3. "main_topics": Liste des sujets principaux identifiés
+            4. "concept_map": Carte conceptuelle interactive
+               - "nodes": [{{"id": "unique_id", "label": "Concept", "level": 1-3, "description": "...", "category": "..."}}]
+               - "edges": [{{"from": "id1", "to": "id2", "relationship": "prérequis/compose/illustre/..."}}]
+            5. "key_definitions": Dictionnaire des termes techniques importants {{term: definition}}
+            6. "quiz_questions": 10 questions adaptatives de niveaux progressifs
                Format: [{{"level": "easy/medium/hard", "question": "...", "options": [...], "correct": 0, "explanation": "..."}}]
-            6. "analogies": Analogies pour simplifier les concepts complexes
-            7. "further_reading": Suggestions de lectures complémentaires
+            7. "analogies": Analogies concrètes pour simplifier les concepts abstraits
+            8. "visual_elements": Description des diagrammes/images intégrés (si présents)
+            9. "further_reading": Suggestions de lectures complémentaires
+            10. "prerequisites": Connaissances préalables recommandées
             
-            Réponds uniquement par le JSON.
+            IMPORTANT: 
+            - Utilise TOUJOURS le format LaTeX pour les équations mathématiques ($...$ pour en ligne, $$...$$ pour bloc).
+            - Conserve la structure hiérarchique du document original.
+            - Si le document contient des images/diagrammes, décris leur contenu et leur relation avec le texte.
+            
+            Réponds uniquement par le JSON valide.
             """
             
-            generate_config = types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.85,
-                thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
-                media_resolution="MEDIA_RESOLUTION_HIGH"
-            )
+            if speed_mode:
+                generate_config = types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.7,
+                    media_resolution="MEDIA_RESOLUTION_MEDIUM"
+                )
+            else:
+                generate_config = types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.85,
+                    thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
+                    media_resolution="MEDIA_RESOLUTION_HIGH"
+                )
             
             response = self.client.models.generate_content(
                 model=self.model_name,
@@ -221,7 +274,7 @@ class GeminiService:
                 "error": str(e)
             }
     
-    def creative_workshop(self, image_file, creative_goal=""):
+    def creative_workshop(self, image_file, creative_goal="", speed_mode=False):
         """Atelier créatif: analyse un design/esquisse"""
         config_error = self._check_config()
         if config_error:
@@ -248,12 +301,19 @@ class GeminiService:
             Réponds uniquement par le JSON.
             """
             
-            generate_config = types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.85,
-                thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
-                media_resolution="MEDIA_RESOLUTION_HIGH"
-            )
+            if speed_mode:
+                generate_config = types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.7,
+                    media_resolution="MEDIA_RESOLUTION_MEDIUM"
+                )
+            else:
+                generate_config = types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.85,
+                    thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
+                    media_resolution="MEDIA_RESOLUTION_HIGH"
+                )
 
             response = self.client.models.generate_content(
                 model=self.model_name,
@@ -281,13 +341,48 @@ class GeminiService:
             raise ValueError(config_error['error'])
 
         system_instruction = f"""
-        Tu es Kachele NeuralSync AI, un tuteur adaptatif expert. 
-        Tu utilises la méthode socratique pour guider l'étudiant. Ne donne jamais la solution directement. 
-        Analyse le contenu (Vidéo, Image, PDF) et pose des questions pour amener l'étudiant à découvrir la réponse par lui-même. 
-        Sois encourageant et adapte ton langage au niveau de l'utilisateur.
+        Tu es Kachele NeuralSync AI, le tuteur adaptatif multimodal d'élite.
         
-        Contexte spécifique de cette session: {context}
-        Niveau actuel de l'utilisateur: {user_level}
+        TES CAPACITÉS MULTIMODALES NATIVES :
+        1. 📹 APPRENTISSAGE VIDÉO INTERACTIF : Tu identifies les moments clés dans les vidéos éducatives pour poser des questions stimulantes et vérifier la compréhension en temps réel.
+        2. 🖼️ RÉSOLUTION VISUELLE SOCRATIQUE : Tu analyses des photos de problèmes (mathématiques, physique, schémas techniques) et guides l'utilisateur étape par étape sans donner la solution.
+        3. 📚 INTELLIGENCE DOCUMENTAIRE UNIVERSELLE : Tu traites TOUS types de documents (PDF, Word, Markdown, texte, HTML, EPUB...) pour créer des cartes conceptuelles interactives, identifier les concepts clés et générer des quiz adaptatifs.
+        4. 🎨 ATELIER CRÉATIF : Tu agis comme un mentor expert pour perfectionner les travaux créatifs (design, architecture, code, art visuel) avec des critiques constructives et des suggestions concrètes.
+
+        TES 4 PILIERS FONDAMENTAUX :
+        1. 💬 DIALOGUE SOCRATIQUE : 
+           - Ne donne JAMAIS la réponse finale, un code complet ou une solution d'équation directe.
+           - Guide l'utilisateur par des questions ciblées qui provoquent le "déclic".
+           - Si l'utilisateur stagne, fournis un indice (hint) ou une analogie, mais jamais le résultat complet.
+        
+        2. 🧠 SUIVI COGNITIF (Cognitive Tracking) : 
+           - Analyse chaque réponse pour identifier les lacunes de connaissances (knowledge gaps).
+           - Ajuste dynamiquement la difficulté de tes questions selon la charge cognitive apparente.
+           - Détecte quand l'utilisateur maîtrise un concept pour passer au suivant.
+        
+        3. 🔍 ANALYSE MULTIMODALE PROFONDE : 
+           - Tu comprends simultanément vidéo, images, texte structuré (dans TOUS formats de documents) et code.
+           - Utilise les détails visuels, temporels ou structurels du contenu analysé pour ancrer tes explications.
+           - Si un document contient des diagrammes ou équations, réfère-toi explicitement à eux.
+        
+        4. ⚡ PRATIQUE GÉNÉRATIVE : 
+           - Génère de nouveaux problèmes uniques adaptés au niveau actuel de l'utilisateur.
+           - Ne recycle jamais les mêmes exercices : chaque problème doit tester la compréhension profonde.
+           - Propose des variations progressives pour consolider la maîtrise.
+
+        FORMAT ET STYLE :
+        - Langue : Détecte automatiquement la langue de l'utilisateur et réponds dans CETTE langue (français, anglais, espagnol, etc.). Ton naturel, expert mais encourageant et bienveillant.
+        - Mathématiques/Sciences : Utilise EXCLUSIVEMENT le format LaTeX ($...$ pour en ligne, $$...$$ pour les blocs).
+        - Exemple : "La dérivée de $x^n$ est $\\frac{{d}}{{dx}} x^n = nx^{{n-1}}$."
+        - Code : Utilise des blocs de code Markdown avec coloration syntaxique appropriée.
+
+        CONTEXTE DE SESSION : 
+        {context}
+        
+        NIVEAU DE L'APPRENANT : 
+        {user_level}
+        
+        RAPPEL : Tu n'es pas un simple assistant, mais un MENTOR SOCRATIQUE qui fait ÉMERGER la compréhension plutôt que de la transmettre passivement.
         """
         
         # Configuration avancée basée sur Google AI Studio

@@ -119,8 +119,8 @@
                         <li class="mb-2"><a href="{% url 'main_app:app' %}"
                                 class="text-decoration-none text-muted hover-lift d-inline-block">Espace Travail</a>
                         </li>
-                        <li class="mb-2"><a href="#"
-                                class="text-decoration-none text-muted hover-lift d-inline-block">Pricing</a></li>
+                        <!-- <li class="mb-2"><a href="#"
+                                class="text-decoration-none text-muted hover-lift d-inline-block">Pricing</a></li> -->
                         <li class="mb-2"><a href="#"
                                 class="text-decoration-none text-muted hover-lift d-inline-block">API</a></li>
                     </ul>
@@ -183,6 +183,19 @@
 
     <!-- Custom Scripts -->
     <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '\\[', right: '\\]', display: true }
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 

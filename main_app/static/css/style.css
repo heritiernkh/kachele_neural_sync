@@ -571,3 +571,31 @@ section {
     color: white;
     border: none;
 }
+
+/* KaTeX Custom Styles */
+.katex {
+    font-size: 1.1em;
+    color: inherit;
+}
+
+.katex-display {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+    overflow-y: hidden;
+    text-align: center;
+}
+
+.message-bubble .katex-display {
+    background: rgba(255, 255, 255, 0.03);
+    border: none;
+    margin: 0.75rem 0;
+}
+
+/* Ensure math is readable on user bubbles (blue gradient) */
+.message.user .katex {
+    color: white;
+}

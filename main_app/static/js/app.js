@@ -68,6 +68,46 @@ function updateLoadingMessage(message) {
     document.getElementById('loadingMessage').textContent = message;
 }
 
+// ============================================
+// ANALYSIS SPINNER (In-page spinner)
+// ============================================
+function showAnalysisSpinner() {
+    // Afficher les zones de chat et d'analyse
+    chatInputSection.style.display = 'none'; // On cache l'input pour l'instant
+    analysisSection.style.display = 'block';
+    chatSection.style.display = 'block';
+
+    // Vider le contenu précédent
+    chatMessages.innerHTML = '';
+
+    // Créer le spinner d'analyse élégant
+    const spinnerHtml = `
+        <div id="analysisSpinner" class="text-center py-5">
+            <div class="mb-4">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <h4 class="h5 text-primary mb-2">
+                <i class="fas fa-brain me-2"></i>Analyse en cours avec Gemini
+            </h4>
+            <p class="text-muted small">
+                Génération d'une question socratique personnalisée...
+            </p>
+        </div>
+    `;
+
+    chatMessages.innerHTML = spinnerHtml;
+}
+
+function hideAnalysisSpinner() {
+    const spinner = document.getElementById('analysisSpinner');
+    if (spinner) {
+        spinner.remove();
+    }
+}
+
+
 // Mode configurations
 const modeConfig = {
     video: {
@@ -153,6 +193,20 @@ function selectMode(mode) {
                 Drag and drop your file here, or click to browse
             </p>
             <input type="file" id="fileInput" accept="" style="display: none;">
+            
+            <!-- Speed Mode Toggle -->
+            <div class="mb-4">
+                <div class="form-check form-switch d-inline-flex align-items-center gap-2 px-4 py-2 rounded-pill bg-dark bg-opacity-25 border border-secondary border-opacity-25">
+                    <input class="form-check-input" type="checkbox" id="speedModeToggle" style="cursor: pointer;">
+                    <label class="form-check-label small text-muted" for="speedModeToggle" style="cursor: pointer;">
+                        ⚡ Mode Rapide <span class="text-info">(~40% plus rapide)</span>
+                    </label>
+                </div>
+                <div class="small text-muted mt-2 px-3" style="max-width: 400px; margin: 0 auto;">
+                    Le mode rapide sacrifie légèrement la profondeur d'analyse pour une vitesse maximale
+                </div>
+            </div>
+            
             <button class="btn btn-primary btn-lg px-4 rounded-pill mb-3" id="browseBtn">
                 <i class="fas fa-folder-open me-2"></i> Browse Files
             </button>
@@ -296,7 +350,9 @@ async function handleFileUpload(file) {
     window.currentFileName = file.name;
 
     // Show loading modal
-    showLoadingModal(`Analyse de ${file.name}...`);
+    const speedModeEnabled = document.getElementById('speedModeToggle')?.checked || false;
+    const speedModeText = speedModeEnabled ? ' (Mode Rapide ⚡)' : '';
+    showLoadingModal(`Analyse de ${file.name}${speedModeText}...`);
     const progressFill = document.getElementById('progressFill');
     if (progressFill) progressFill.style.width = '0%';
 
@@ -304,6 +360,7 @@ async function handleFileUpload(file) {
     formData.append('file', file);
     formData.append('session_id', currentSessionId);
     formData.append('context', '');
+    formData.append('speed_mode', speedModeEnabled.toString());
 
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
@@ -330,9 +387,15 @@ async function handleFileUpload(file) {
             if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                     const data = JSON.parse(xhr.responseText);
+
+                    // ✅ NOUVEAU: Fermer le modal immédiatement après l'upload
                     hideLoadingModal();
 
                     if (data.success) {
+                        // ✅ NOUVEAU: Afficher spinner d'analyse dans la zone de travail
+                        showAnalysisSpinner();
+
+                        // Afficher l'analyse et générer la question
                         window.KacheleNeuralSync.showToast('Analysis complete!', 'success');
                         displayAnalysis(data.analysis);
                         resolve(data);
@@ -530,11 +593,22 @@ function displayAnalysis(analysis) {
 
     analysisContent.innerHTML = html;
 
-    // Ensure loader is hidden
-    hideLoadingModal();
+    // Trigger KaTeX rendering for analysis
+    if (window.renderMathInElement) {
+        renderMathInElement(analysisContent, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+            throwOnError: false
+        });
+    }
 
-    // Start interactive chat immediately
-    startInteractiveChat("Bonjour ! J'ai terminé l'analyse de ton document. De quoi souhaites-tu discuter ?");
+    // 🎯 NOUVEAU: Générer automatiquement la première question socratique
+    // Le spinner est déjà affiché, on génère juste la question
+    generateAndDisplayFirstQuestion();
 
     document.querySelectorAll('.answer-question-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -543,6 +617,63 @@ function displayAnalysis(analysis) {
             startInteractiveChat(question, answer);
         });
     });
+}
+
+// 🎯 NOUVELLE FONCTION: Génère et affiche proactivement la première question socratique
+async function generateAndDisplayFirstQuestion() {
+    if (!currentSessionId || !currentMode) {
+        console.warn('No session or mode available for first question generation');
+        hideAnalysisSpinner(); // Cacher le spinner même en cas d'erreur
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/first-question/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                session_id: currentSessionId,
+                mode: currentMode
+            })
+        });
+
+        const data = await response.json();
+
+        // ✅ Cacher le spinner d'analyse
+        hideAnalysisSpinner();
+
+        if (data.success && data.question) {
+            // Afficher la question générée
+            const questionIntro = data.is_fallback
+                ? '🤔 Pendant que Gemini réfléchit, commençons par ceci :'
+                : '🧠 J\'ai analysé ton contenu. Voici ma première question pour toi :';
+
+            addMessage('ai', `${questionIntro}\n\n${data.question}`);
+        } else {
+            // Fallback message si ça échoue
+            addMessage('ai', "Bonjour ! J'ai terminé l'analyse. De quoi souhaites-tu discuter ?");
+        }
+    } catch (error) {
+        console.error('Error generating first question:', error);
+
+        // ✅ Cacher le spinner même en cas d'erreur
+        hideAnalysisSpinner();
+
+        // Message de fallback en cas d'erreur réseau
+        const fallback = {
+            'video': "Après avoir analysé cette vidéo, qu'en as-tu retenu comme point le plus important ?",
+            'problem': "Avant de te guider, dis-moi : par où commencerais-tu pour résoudre ce problème ?",
+            'document': "Maintenant que j'ai parcouru ce document, quelles sont les idées principales que tu en tires ?",
+            'creative': "Peux-tu m'expliquer ce que tu as cherché à exprimer dans ce travail ?"
+        };
+        addMessage('ai', `🤔 ${fallback[currentMode] || "De quoi aimerais-tu discuter ?"}`);
+    }
+
+    // Scroller vers le bas et focus sur l'input
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    chatInput.focus();
 }
 
 // ============================================
