@@ -64,12 +64,25 @@ class GeminiService:
             # Attendre que le fichier soit prêt (si nécessaire, le SDK gère souvent ça mieux)
             # Mais pour la vidéo, c'est mieux d'attendre l'état ACTIVE
             import time
+            start_time = time.time()
+            timeout = 300 # 5 minutes max
+            
+            print(f"DEBUG: Processing video {upload_result.name}...")
             while upload_result.state.name == "PROCESSING":
-                time.sleep(2)
-                upload_result = self.client.files.get(name=upload_result.name)
+                elapsed = int(time.time() - start_time)
+                if elapsed > timeout:
+                    print(f"DEBUG: ❌ Processing timeout after {timeout}s")
+                    raise TimeoutError("Le traitement de la vidéo prend trop de temps. Veuillez réessayer avec un fichier plus court.")
                 
+                print(f"DEBUG: Still processing... ({elapsed}s elapsed)")
+                time.sleep(5) # Augmenté à 5s pour moins de requêtes
+                upload_result = self.client.files.get(name=upload_result.name)
+            
+            print(f"DEBUG: Video State: {upload_result.state.name}")
             if upload_result.state.name == "FAILED":
                 raise ValueError("Video processing failed")
+            elif upload_result.state.name != "ACTIVE":
+                print(f"DEBUG: Warning - Unexpected state: {upload_result.state.name}")
 
             prompt = f"""
             Analyse cette vidéo en profondeur. {context}

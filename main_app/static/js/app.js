@@ -11,6 +11,15 @@ let sessionStats = {
     hintsUsed: 0
 };
 
+// Helper for video timestamps
+function timestampToSeconds(ts) {
+    if (!ts || typeof ts !== 'string') return 0;
+    const parts = ts.split(':').map(Number);
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    return 0;
+}
+
 // DOM Elements
 const modeCards = document.querySelectorAll('.mode-card');
 const modeSelectorSection = document.querySelector('.mode-selector-section');
@@ -65,39 +74,84 @@ function hideLoadingModal() {
 }
 
 function updateLoadingMessage(message) {
-    document.getElementById('loadingMessage').textContent = message;
+    // Deprecated for showProgressStatus
 }
 
 // ============================================
-// ANALYSIS SPINNER (In-page spinner)
+// STATUS & PROGRESS UI (In-page)
 // ============================================
+function showProgressStatus(message, percent = null) {
+    let statusEl = document.getElementById('uploadStatus');
+    if (!statusEl) {
+        // Initial setup for analysis view
+        uploadSection.style.display = 'none';
+        analysisSection.style.display = 'block';
+        chatSection.style.display = 'block';
+        chatMessages.innerHTML = '';
+
+        const html = `
+            <div id="uploadStatus" class="result-card animate-slide-up mb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="spinner-border spinner-border-sm text-primary me-3" role="status"></div>
+                    <h5 class="h6 mb-0" id="statusText">${message}</h5>
+                </div>
+                <div class="progress bg-secondary bg-opacity-25" style="height: 6px;">
+                    <div id="statusProgress" class="progress-bar progress-bar-striped progress-bar-animated" 
+                         style="width: 0%; background: var(--gradient-primary) !important;"></div>
+                </div>
+            </div>
+        `;
+        chatMessages.insertAdjacentHTML('afterbegin', html);
+        statusEl = document.getElementById('uploadStatus');
+    }
+
+    const textEl = document.getElementById('statusText');
+    const progEl = document.getElementById('statusProgress');
+
+    if (textEl) {
+        let displayMessage = message;
+        // Ajouter un avertissement pour la vidéo car c'est long
+        if (message.includes('Analyse par Gemini 3 en cours')) {
+            if (currentMode === 'video') {
+                displayMessage = "Analyse Gemini en cours... (Cela peut prendre 1-3 minutes pour une vidéo)";
+            } else if (currentMode === 'document') {
+                displayMessage = "Analyse Gemini en cours... (Lecture du document...)";
+            }
+        }
+        textEl.textContent = displayMessage;
+    }
+    if (progEl && percent !== null) {
+        progEl.style.width = `${percent}%`;
+    }
+}
+
+function hideProgressStatus() {
+    const statusEl = document.getElementById('uploadStatus');
+    if (statusEl) statusEl.remove();
+}
+
 function showAnalysisSpinner() {
     // Afficher les zones de chat et d'analyse
     chatInputSection.style.display = 'none'; // On cache l'input pour l'instant
     analysisSection.style.display = 'block';
     chatSection.style.display = 'block';
 
-    // Vider le contenu précédent
-    chatMessages.innerHTML = '';
-
-    // Créer le spinner d'analyse élégant
+    // Créer le spinner d'analyse élégant (ajouté à la fin, pas d'effacement)
     const spinnerHtml = `
-        <div id="analysisSpinner" class="text-center py-5">
-            <div class="mb-4">
-                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+        <div id="analysisSpinner" class="text-center py-4 opacity-75">
+            <div class="mb-3">
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </div>
-            <h4 class="h5 text-primary mb-2">
-                <i class="fas fa-brain me-2"></i>Analyse en cours avec Gemini
-            </h4>
-            <p class="text-muted small">
-                Génération d'une question socratique personnalisée...
+            <p class="text-muted small mb-0">
+                <i class="fas fa-brain me-2"></i>Kachele Neural Sync Live prépare votre première question socratique...
             </p>
         </div>
     `;
 
-    chatMessages.innerHTML = spinnerHtml;
+    chatMessages.insertAdjacentHTML('beforeend', spinnerHtml);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 function hideAnalysisSpinner() {
@@ -105,6 +159,38 @@ function hideAnalysisSpinner() {
     if (spinner) {
         spinner.remove();
     }
+    // Restaurer la zone de saisie pour l'utilisateur
+    if (chatInputSection) {
+        chatInputSection.style.display = 'block';
+    }
+}
+
+// AI Thinking Indicator in chat
+function showThinkingIndicator() {
+    // Prevent duplicate indicators
+    if (document.getElementById('thinkingIndicator')) return;
+
+    const indicatorHtml = `
+        <div id="thinkingIndicator" class="message ai">
+            <div class="message-avatar">🧠</div>
+            <div class="message-content">
+                <div class="message-bubble">
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    chatMessages.insertAdjacentHTML('beforeend', indicatorHtml);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function hideThinkingIndicator() {
+    const indicator = document.getElementById('thinkingIndicator');
+    if (indicator) indicator.remove();
 }
 
 
@@ -348,13 +434,12 @@ async function handleFileUpload(file) {
         return;
     }
     window.currentFileName = file.name;
+    window.currentUploadedFile = file; // Add this line to store the file object
 
-    // Show loading modal
+    // Start visual feedback in-page
     const speedModeEnabled = document.getElementById('speedModeToggle')?.checked || false;
     const speedModeText = speedModeEnabled ? ' (Mode Rapide ⚡)' : '';
-    showLoadingModal(`Analyse de ${file.name}${speedModeText}...`);
-    const progressFill = document.getElementById('progressFill');
-    if (progressFill) progressFill.style.width = '0%';
+    showProgressStatus(`Préparation de ${file.name}${speedModeText}...`, 0);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -369,15 +454,10 @@ async function handleFileUpload(file) {
         xhr.upload.addEventListener('progress', (e) => {
             if (e.lengthComputable) {
                 const percentComplete = Math.round((e.loaded / e.total) * 100);
-                if (progressFill) {
-                    progressFill.style.width = `${percentComplete}%`;
-
-                    if (percentComplete === 100) {
-                        updateLoadingMessage('Analyse par Gemini 3 en cours...');
-                        progressFill.classList.add('progress-bar-striped', 'progress-bar-animated');
-                    } else {
-                        updateLoadingMessage(`Téléchargement: ${percentComplete}%`);
-                    }
+                if (percentComplete === 100) {
+                    showProgressStatus('Analyse par Gemini 3 en cours...', 100);
+                } else {
+                    showProgressStatus(`Téléchargement: ${percentComplete}%`, percentComplete);
                 }
             }
         });
@@ -388,12 +468,12 @@ async function handleFileUpload(file) {
                 try {
                     const data = JSON.parse(xhr.responseText);
 
-                    // ✅ NOUVEAU: Fermer le modal immédiatement après l'upload
-                    hideLoadingModal();
+                    // Final status before display
+                    showProgressStatus('Finalisation de l\'analyse...', 100);
 
                     if (data.success) {
-                        // ✅ NOUVEAU: Afficher spinner d'analyse dans la zone de travail
-                        showAnalysisSpinner();
+                        // Vider le chat pour la nouvelle analyse
+                        chatMessages.innerHTML = '';
 
                         // Afficher l'analyse et générer la question
                         window.KacheleNeuralSync.showToast('Analysis complete!', 'success');
@@ -404,12 +484,12 @@ async function handleFileUpload(file) {
                         reject(new Error(data.error));
                     }
                 } catch (e) {
-                    hideLoadingModal();
+                    hideProgressStatus();
                     displayError('Invalid server response');
                     reject(e);
                 }
             } else {
-                hideLoadingModal();
+                hideProgressStatus();
                 let errorMsg = 'Upload failed';
                 try {
                     const errData = JSON.parse(xhr.responseText);
@@ -423,7 +503,7 @@ async function handleFileUpload(file) {
 
         // Error event
         xhr.addEventListener('error', () => {
-            hideLoadingModal();
+            hideProgressStatus();
             displayError('Network error during upload');
             reject(new Error('Network error'));
         });
@@ -460,21 +540,23 @@ function displayError(message) {
 // 4. DISPLAY ANALYSIS
 // ============================================
 function displayAnalysis(analysis) {
+    hideProgressStatus(); // Supprimer la barre de progression/status
     // DO NOT hide uploadSection, we will compact it instead later
     analysisSection.style.display = 'block';
 
     const analysisContent = document.getElementById('analysisContent');
     let html = '<div class="analysis-container">';
 
-    // Summary
-    if (analysis.summary) {
+    // Summary / Analysis
+    const summaryText = analysis.summary || analysis.analysis || analysis.description;
+    if (summaryText) {
         html += `
             <div class="result-card animate-slide-up">
                 <div class="result-header">
                     <div class="result-icon"><i class="fas fa-lightbulb"></i></div>
-                    <h3 class="result-title">Executive Summary</h3>
+                    <h3 class="result-title">${currentMode === 'creative' ? 'Expert Design Analysis' : 'Executive Summary'}</h3>
                 </div>
-                <p class="text-secondary">${analysis.summary}</p>
+                <p class="text-secondary">${summaryText}</p>
             </div>
         `;
     }
@@ -492,6 +574,68 @@ function displayAnalysis(analysis) {
             `<span class="concept-tag">${concept}</span>`
         ).join('')}
                 </div>
+            </div>
+        `;
+    }
+
+    // Concept Map (Visual/Hierarchical)
+    if (analysis.concept_map && analysis.concept_map.nodes) {
+        html += `
+            <div class="result-card animate-slide-up" style="animation-delay: 0.15s">
+                <div class="result-header">
+                    <div class="result-icon"><i class="fas fa-project-diagram"></i></div>
+                    <h3 class="result-title">Concept Map</h3>
+                </div>
+                <div class="concept-map-container mt-3">
+                    <div class="vstack gap-3">
+                        ${analysis.concept_map.nodes.slice(0, 8).map(node => `
+                            <div class="p-3 rounded-4 bg-dark bg-opacity-25 border border-secondary border-opacity-10 hover-glow transition-base">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="badge bg-primary bg-opacity-25 text-primary small">Level ${node.level || 1}</span>
+                                    <strong class="text-white">${node.label}</strong>
+                                </div>
+                                <p class="text-secondary small mb-0">${node.description || ''}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Analogies
+    if (analysis.analogies && analysis.analogies.length > 0) {
+        html += `
+            <div class="result-card animate-slide-up" style="animation-delay: 0.18s">
+                <div class="result-header">
+                    <div class="result-icon"><i class="fas fa-magic"></i></div>
+                    <h3 class="result-title">Learning Analogies</h3>
+                </div>
+                <div class="vstack gap-3 mt-2">
+                    ${analysis.analogies.slice(0, 3).map(analogy => `
+                        <div class="analogy-item border-start border-primary border-4 ps-3 py-1">
+                            <p class="text-secondary italic mb-0">"${analogy}"</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // Key Definitions
+    if (analysis.key_definitions && Object.keys(analysis.key_definitions).length > 0) {
+        html += `
+            <div class="result-card animate-slide-up" style="animation-delay: 0.2s">
+                <div class="result-header">
+                    <div class="result-icon"><i class="fas fa-book"></i></div>
+                    <h3 class="result-title">Glossary</h3>
+                </div>
+                <dl class="row mt-2 g-3">
+                    ${Object.entries(analysis.key_definitions).slice(0, 6).map(([term, def]) => `
+                        <dt class="col-sm-4 text-primary small">${term}</dt>
+                        <dd class="col-sm-8 text-secondary small">${def}</dd>
+                    `).join('')}
+                </dl>
             </div>
         `;
     }
@@ -549,7 +693,26 @@ function displayAnalysis(analysis) {
         `;
     }
 
-    // Creative-specific: Suggestions
+    // Creative Workshop: Strengths
+    if (analysis.strengths && analysis.strengths.length > 0) {
+        html += `
+            <div class="result-card animate-slide-up" style="animation-delay: 0.15s">
+                <div class="result-header">
+                    <div class="result-icon bg-success bg-opacity-10 text-success"><i class="fas fa-check-circle"></i></div>
+                    <h3 class="result-title">Design Strengths</h3>
+                </div>
+                <div class="list-group list-group-flush bg-transparent">
+                    ${analysis.strengths.map(s => `
+                        <div class="list-group-item bg-transparent border-secondary border-opacity-10 px-0">
+                            <span class="text-secondary small"><i class="fas fa-star text-warning me-2"></i> ${typeof s === 'object' ? s.aspect || s.point : s}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // Creative Workshop: Improvements (Enhanced)
     if (analysis.improvements && analysis.improvements.length > 0) {
         html += `
             <div class="result-card animate-slide-up" style="animation-delay: 0.2s">
@@ -558,12 +721,78 @@ function displayAnalysis(analysis) {
                     <h3 class="result-title">Suggestions for Improvement</h3>
                 </div>
                 <div class="list-group list-group-flush bg-transparent">
-                    ${analysis.improvements.slice(0, 5).map(imp =>
-            `<div class="list-group-item bg-transparent border-secondary border-opacity-25 px-0">
-                            <strong class="d-block text-white mb-1">${imp.aspect}</strong>
-                            <span class="text-secondary small">${imp.suggestion}</span>
-                        </div>`
-        ).join('')}
+                    ${analysis.improvements.slice(0, 10).map(imp => `
+                        <div class="list-group-item bg-transparent border-secondary border-opacity-25 px-0">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-white">${imp.aspect}</strong>
+                                ${imp.priority ? `<span class="badge ${imp.priority === 'high' ? 'bg-danger' : imp.priority === 'medium' ? 'bg-warning' : 'bg-info'} bg-opacity-25 text-capitalize small">${imp.priority}</span>` : ''}
+                            </div>
+                            <span class="text-secondary small d-block mb-1">${imp.suggestion}</span>
+                            ${imp.why ? `<p class="text-muted italic smaller mb-0"><i class="fas fa-info-circle me-1"></i> ${imp.why}</p>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // Creative Workshop: Variations
+    if (analysis.variations && analysis.variations.length > 0) {
+        html += `
+            <div class="result-card animate-slide-up" style="animation-delay: 0.25s">
+                <div class="result-header">
+                    <div class="result-icon"><i class="fas fa-layer-group"></i></div>
+                    <h3 class="result-title">Aesthetic Variations</h3>
+                </div>
+                <div class="vstack gap-2 mt-2">
+                    ${analysis.variations.map(v => `
+                        <div class="p-2 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
+                            <span class="text-secondary small">${v}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // Creative Workshop: Technique & Tools
+    if (analysis.technique_tips || analysis.design_principles) {
+        html += `
+            <div class="result-card animate-slide-up" style="animation-delay: 0.3s">
+                <div class="result-header">
+                    <div class="result-icon"><i class="fas fa-tools"></i></div>
+                    <h3 class="result-title">Expert Technique Tips</h3>
+                </div>
+                <div class="row g-3 mt-1">
+                    ${(analysis.technique_tips || []).map(tip => `
+                        <div class="col-12">
+                            <div class="p-2 border-start border-primary border-3 bg-primary bg-opacity-10">
+                                <span class="text-secondary small">${tip}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                    ${(analysis.design_principles || []).map(p => `
+                        <div class="col-md-6">
+                            <div class="badge bg-secondary bg-opacity-25 text-white w-100 py-2">${p}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // Creative Workshop: Inspiration
+    if (analysis.inspiration && analysis.inspiration.length > 0) {
+        html += `
+            <div class="result-card animate-slide-up" style="animation-delay: 0.35s">
+                <div class="result-header">
+                    <div class="result-icon"><i class="fas fa-paint-brush"></i></div>
+                    <h3 class="result-title">Creative Inspiration</h3>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    ${analysis.inspiration.map(ins => `
+                        <span class="badge bg-gradient-secondary rounded-pill px-3">${ins}</span>
+                    `).join('')}
                 </div>
             </div>
         `;
@@ -591,7 +820,79 @@ function displayAnalysis(analysis) {
     analysisSection.style.display = 'block';
     chatSection.style.display = 'block';
 
+    // ✅ NEW: Interactive Video Sync
+    if (currentMode === 'video' && window.currentUploadedFile) {
+        const videoSection = document.getElementById('videoPlayerSection');
+        const videoPlayer = document.getElementById('mainVideoPlayer');
+        const markersContainer = document.getElementById('videoMarkers');
+
+        videoSection.style.display = 'block';
+        videoPlayer.src = URL.createObjectURL(window.currentUploadedFile);
+
+        // Add markers for timestamps
+        markersContainer.innerHTML = '';
+        if (analysis.timestamps) {
+            analysis.timestamps.forEach(ts => {
+                const badge = document.createElement('button');
+                badge.className = 'btn btn-outline-info btn-sm rounded-pill mb-2 px-3';
+                badge.style.fontSize = '0.75rem';
+                badge.innerHTML = `<i class="fas fa-clock me-1"></i> ${ts.timestamp} - ${ts.description || 'Moment Clé'}`;
+                badge.onclick = () => {
+                    videoPlayer.currentTime = timestampToSeconds(ts.timestamp);
+                    videoPlayer.play();
+                };
+                markersContainer.appendChild(badge);
+            });
+        }
+
+        // Sync interactive questions
+        const questions = analysis.interactive_questions || [];
+        const triggeredTimes = new Set();
+
+        videoPlayer.ontimeupdate = () => {
+            const currentTime = Math.floor(videoPlayer.currentTime);
+            questions.forEach(q => {
+                const targetSec = timestampToSeconds(q.timestamp);
+                // Trigger within 1 second of target
+                if (targetSec > 0 && Math.abs(currentTime - targetSec) <= 1 && !triggeredTimes.has(q.timestamp)) {
+                    triggeredTimes.add(q.timestamp);
+                    videoPlayer.pause();
+
+                    // Add AI message for interactive question
+                    const msg = `💡 **Pause Interactive** (${q.timestamp})\n\n${q.question}\n\n*J'ai mis la vidéo en pause pour que nous puissions en discuter !*`;
+                    addMessage('ai', msg);
+
+                    // Store for evaluation
+                    chatInput.dataset.currentQuestion = q.question;
+                    chatInput.dataset.correctAnswer = q.answer || '';
+                }
+            });
+        };
+    } else {
+        // Hide video section for other modes
+        const videoSection = document.getElementById('videoPlayerSection');
+        if (videoSection) videoSection.style.display = 'none';
+        const videoPlayer = document.getElementById('mainVideoPlayer');
+        if (videoPlayer) {
+            videoPlayer.pause();
+            videoPlayer.src = "";
+        }
+    }
+
     analysisContent.innerHTML = html;
+
+    // ✅ NOUVEAU: Ajouter le résumé et les concepts au chat INSTANTANÉMENT
+    let chatIntro = `J'ai terminé l'analyse de **${window.currentFileName || 'votre contenu'}**. Voici une synthèse rapide :\n\n`;
+
+    if (analysis.summary) {
+        chatIntro += `### 💡 Résumé\n${analysis.summary}\n\n`;
+    }
+
+    if (analysis.key_concepts && analysis.key_concepts.length > 0) {
+        chatIntro += `### 🧠 Concepts Clés\n- ${analysis.key_concepts.join('\n- ')}\n\n`;
+    }
+
+    addMessage('ai', chatIntro);
 
     // Trigger KaTeX rendering for analysis
     if (window.renderMathInElement) {
@@ -606,8 +907,10 @@ function displayAnalysis(analysis) {
         });
     }
 
-    // 🎯 NOUVEAU: Générer automatiquement la première question socratique
-    // Le spinner est déjà affiché, on génère juste la question
+    // ✅ NOUVEAU: Afficher le spinner UNIQUEMENT après avoir montré le résumé
+    showAnalysisSpinner();
+
+    // 🎯 Générer automatiquement la première question socratique
     generateAndDisplayFirstQuestion();
 
     document.querySelectorAll('.answer-question-btn').forEach(btn => {
@@ -746,6 +1049,7 @@ async function sendMessage() {
 }
 
 async function askQuestion(question) {
+    showThinkingIndicator();
     try {
         const response = await fetch('/api/ask/', {
             method: 'POST',
@@ -760,6 +1064,7 @@ async function askQuestion(question) {
         });
 
         const data = await response.json();
+        hideThinkingIndicator();
 
         if (data.success) {
             addMessage('ai', data.response);
@@ -769,12 +1074,14 @@ async function askQuestion(question) {
             throw new Error(data.error);
         }
     } catch (error) {
+        hideThinkingIndicator();
         console.error('Error asking question:', error);
         addMessage('ai', `Désolé, une erreur est survenue : ${error.message}`);
     }
 }
 
 async function submitAnswer(question, userAnswer, correctAnswer) {
+    showThinkingIndicator();
     try {
         const response = await fetch('/api/answer/', {
             method: 'POST',
@@ -791,6 +1098,7 @@ async function submitAnswer(question, userAnswer, correctAnswer) {
         });
 
         const data = await response.json();
+        hideThinkingIndicator();
 
         if (data.success) {
             const evaluation = data.evaluation;
@@ -813,6 +1121,7 @@ async function submitAnswer(question, userAnswer, correctAnswer) {
             throw new Error(data.error);
         }
     } catch (error) {
+        hideThinkingIndicator();
         console.error('Error submitting answer:', error);
         addMessage('ai', 'Sorry, I couldn\'t evaluate your answer. Please try again.');
     }
@@ -937,6 +1246,15 @@ backBtn.addEventListener('click', () => {
         hintsUsed: 0
     };
     updateSessionStats();
+
+    // Reset Video Player
+    const videoPlayer = document.getElementById('mainVideoPlayer');
+    if (videoPlayer) {
+        videoPlayer.pause();
+        videoPlayer.src = "";
+    }
+    const videoSection = document.getElementById('videoPlayerSection');
+    if (videoSection) videoSection.style.display = 'none';
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
